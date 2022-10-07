@@ -15,3 +15,16 @@
  *     doAThing: () => {}
  *   })
  */
+import { ipcRenderer, contextBridge } from 'electron'
+console.log("Preload script loaded")
+contextBridge.exposeInMainWorld('ipcRenderer', {
+    send: async (channel, data) => ipcRenderer.send(channel, data),
+    receive: async (channel, func) => {
+        let validChannels = ['loadXlsxReply']
+        if (validChannels.includes(channel)) {
+          // Deliberately strip event as it includes `sender`
+          ipcRenderer.on(channel, (event, ...args) => func(...args))
+        }
+      },
+    invoke: async (channel, data) => ipcRenderer.invoke(channel, data)
+})
