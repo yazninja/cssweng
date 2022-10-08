@@ -1,5 +1,6 @@
 <template>
   <q-page class="flex flex-center column">
+    <!-- File Input Component -->
     <div class="q-gutter-md row items-start">
       <q-file
         v-model="files"
@@ -19,10 +20,12 @@
         </template>
       </q-file>
     </div>
+    <!-- End File Input Component -->
     <div v-if="files && (!players || busy)">
       <q-spinner-cube color="primary" size="2em" />
     </div>
     <div v-if="players && !busy" class="q-gutter-sm">
+      <!-- Quick Edit Component -->
       <q-select
         bg-color="white"
         filled
@@ -102,6 +105,7 @@
           </q-tr>
         </template>
       </q-table>
+      <!-- Action Buttons -->
       <div class="flex flex-center" style="gap: 10px">
         <q-btn
           push
@@ -118,17 +122,23 @@
           @click="dialogErrors = true"
         />
       </div>
+      <!-- End Action Buttons -->
     </div>
+    <!-- Dialog Components -->
     <q-dialog v-model="dialogCompiled" position="bottom">
       <q-card class="flex flex-center q-gutter-md" style="width: 350px">
         <div class="text-bold">Data Compiled</div>
       </q-card>
     </q-dialog>
+    <!-- End of Components -->
+    <!-- just repeat -->
     <q-dialog v-model="dialogErrors" position="bottom">
       <q-card class="flex flex-center q-gutter-md" style="width: 350px">
         <div class="text-bold">No Errors Found</div>
       </q-card>
     </q-dialog>
+    <!-- just repeat -->
+    <!-- error components -->
     <q-dialog
       transition-show="slide-down"
       seamless
@@ -143,6 +153,7 @@
         <pre>Error: {{ errorMessage }}</pre>
       </div>
     </q-dialog>
+    <!-- error components -->
   </q-page>
 </template>
 

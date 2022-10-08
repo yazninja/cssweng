@@ -5,6 +5,9 @@ import { readFile } from 'fs/promises'
 import ExcelJS from 'exceljs'
 import os from 'os'
 import { event } from 'quasar';
+import { default as summarizeData }from './handlers/summarizeData.js'
+
+import loadXlsx from './handlers/loadXlsx.js'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -72,6 +75,11 @@ app.on('activate', () => {
   }
 })
 
+summarizeData(); // basically just call the funtion/s
+
+loadXlsx(); //
+
+/*
 ipcMain.handle('loadXlsx', async (event, path) => {
   let excelFile = await readFile(path).catch(err => console.log(err))
   const workbook = new ExcelJS.Workbook();
@@ -135,6 +143,7 @@ ipcMain.handle('loadXlsx', async (event, path) => {
   console.log(`Loaded ${players.length} players`)
   return players
 })
+*/
 
 ipcMain.handle('getThemeMode', async (event) => {
   return nativeTheme.shouldUseDarkColors
