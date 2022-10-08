@@ -19,10 +19,10 @@
         </template>
       </q-file>
     </div>
-    <div v-if="files && !players">
+    <div v-if="files && (!players || busy)">
       <q-spinner-cube color="primary" size="2em" />
     </div>
-    <div v-if="players" class="q-gutter-sm">
+    <div v-if="players && !busy" class="q-gutter-sm">
       <q-select
         bg-color="white"
         filled
@@ -30,61 +30,85 @@
         :options="playerNames"
         label="Quick Edit"
       />
-      <q-table v-if="currPlayer"
+      <q-table
+        v-if="currPlayer"
         :rows="players[currPlayer.value].bets"
-        :title="currPlayer.label+'\'s bets' + ' [t: ' + players[currPlayer.value].tong+'%' + ' | c: ' + players[currPlayer.value].comm+'%]'"
+        :title="
+          currPlayer.label +
+          '\'s bets' +
+          ' [t: ' +
+          players[currPlayer.value].tong +
+          '%' +
+          ' | c: ' +
+          players[currPlayer.value].comm +
+          '%]'
+        "
         :rows-per-page-options="[]"
         row-key="day"
         dense
         :pagination="{ rowsPerPage: 20 }"
         style="width: 400px"
       >
-      <template v-slot:body="props">
-        <q-tr :props="props">
-          <q-td key="day" :props="props">
-            {{ props.row.day }}
-            <q-popup-edit v-model="props.row.day" auto-save v-slot="scope">
-              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
-            </q-popup-edit>
-          </q-td>
-          <q-td key="amount" :props="props">
-            {{ props.row.amount }}
-            <q-popup-edit v-model="props.row.amount" auto-save v-slot="scope">
-              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
-            </q-popup-edit>
-          </q-td>
-          <q-td key="team" :props="props">
-            {{ props.row.team }}
-            <q-popup-edit v-model="props.row.team" auto-save v-slot="scope">
-              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
-            </q-popup-edit>
-          </q-td>
-          <q-td key="result" :props="props">
-            {{ props.row.result }}
-            <q-popup-edit v-model="props.row.result" auto-save v-slot="scope">
-              <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set" />
-            </q-popup-edit>
-          </q-td>
-        </q-tr>
-      </template> 
-        <!-- <template v-slot:body="props">
+        <template v-slot:body="props">
           <q-tr :props="props">
-            <q-td key="desc" :props="props">
+            <q-td key="day" :props="props">
               {{ props.row.day }}
-              <q-popup-edit v-model="props.row.name" title="Edit the Name" auto-save v-slot="scope">
-                <q-input v-model="scope.value" dense autofocus counter @keyup.enter="scope.set"/>
+              <q-popup-edit v-model="props.row.day" auto-save v-slot="scope">
+                <q-input
+                  v-model="scope.value"
+                  dense
+                  autofocus
+                  counter
+                  @keyup.enter="scope.set"
+                />
+              </q-popup-edit>
+            </q-td>
+            <q-td key="amount" :props="props">
+              {{ props.row.amount }}
+              <q-popup-edit v-model="props.row.amount" auto-save v-slot="scope">
+                <q-input
+                  v-model="scope.value"
+                  dense
+                  autofocus
+                  counter
+                  @keyup.enter="scope.set"
+                />
+              </q-popup-edit>
+            </q-td>
+            <q-td key="team" :props="props">
+              {{ props.row.team }}
+              <q-popup-edit v-model="props.row.team" auto-save v-slot="scope">
+                <q-input
+                  v-model="scope.value"
+                  dense
+                  autofocus
+                  counter
+                  @keyup.enter="scope.set"
+                />
+              </q-popup-edit>
+            </q-td>
+            <q-td key="result" :props="props">
+              {{ props.row.result }}
+              <q-popup-edit v-model="props.row.result" auto-save v-slot="scope">
+                <q-input
+                  v-model="scope.value"
+                  dense
+                  autofocus
+                  counter
+                  @keyup.enter="scope.set"
+                />
               </q-popup-edit>
             </q-td>
           </q-tr>
-        </template> -->
+        </template>
       </q-table>
-      <div class="flex flex-center" style="gap:10px;">
+      <div class="flex flex-center" style="gap: 10px">
         <q-btn
           push
           rounded
           color="primary"
           label="Compile Data"
-          @click="dialogCompiled = true"
+          @click="dialogCompiled = true && compileData()"
         />
         <q-btn
           push
@@ -105,10 +129,25 @@
         <div class="text-bold">No Errors Found</div>
       </q-card>
     </q-dialog>
+    <q-dialog
+      transition-show="slide-down"
+      seamless
+      position="top"
+      v-model="showError"
+      @show="handleError()"
+      ><div
+        class="bg-red text-white text-weight-bold flex flex-center"
+        style="padding-block: 3px; padding-inline: 10px; right: 0"
+      >
+        <q-icon left size="sm" :name=errorType />
+        <pre>Error: {{ errorMessage }}</pre>
+      </div>
+    </q-dialog>
   </q-page>
 </template>
+
 <script>
-import { defineComponent, onBeforeMount, ref } from "vue";
+import { defineComponent, ref } from "vue";
 import { useQuasar } from "quasar";
 export default defineComponent({
   name: "IndexPage",
@@ -123,11 +162,27 @@ export default defineComponent({
       errorMessage: ref(null),
       darkMode: ref($q.dark.isActive),
       currPlayer: ref(null),
+      showError: ref(false),
+      busy: ref(false),
+      errorType: ref(null),
       counterLabelFn({ totalSize, filesNumber, maxFiles }) {
         return filesNumber < 1 ? "" : totalSize;
       },
       async parseXlsx(f) {
-        this.players = await window.ipcRenderer.invoke("loadXlsx", f.path);;
+        this.players = await window.ipcRenderer.invoke("loadXlsx", f.path);
+        if(this.players?.error && this.players?.errorType == "error") {
+          this.errorMessage = this.players.error;
+          this.errorType = this.players.errorType;
+          this.showError = true;
+          this.files = null;
+          this.players = null;
+          return;
+        }
+        else if(this.players?.error && this.players?.errorType == "warning") {
+          this.errorMessage = this.players.error;
+          this.errorType = this.players.errorType;
+          this.showError = true;
+        }
         this.playerNames = this.players.map((p, index) =>
           Object({ label: p.name, value: index })
         );
@@ -140,6 +195,20 @@ export default defineComponent({
         this.currPlayer = null;
         this.files = null;
         console.log("cleared");
+      },
+      async compileData() {
+        this.busy = true;
+        setTimeout(() => {
+          this.busy = false;
+        }, 1000);
+        console.log("Compiling Data");
+        this.errorMessage = "Lorem Ispum Dolor Sit Amet";
+        this.showError = true;
+      },
+      async handleError() {
+        setTimeout(() => {
+          this.showError = false;
+        }, 2500);
       },
     };
   },

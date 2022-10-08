@@ -80,6 +80,7 @@ ipcMain.handle('loadXlsx', async (event, path) => {
   let players = [];
   // Initialize Players
   let playWorksheet = workbook.getWorksheet("Jojo Bettors")
+  if(!playWorksheet) { return { error: "Missing Jojo Bettors Worksheet", errorType: "error"} }
   playWorksheet.eachRow(row => {
     if (row._cells[0].value === null) return
     players.push({
@@ -113,11 +114,12 @@ ipcMain.handle('loadXlsx', async (event, path) => {
               let bet = {};
               bet.day = sheet.name
               bet.amount = cell.value;
-              if (sheet.getRow(rowNum).getCell(1).value === 'UNDER') {
-                bet.team = sheet.getRow(rowNum - 2).getCell(1).value + " " + sheet.getRow(rowNum).getCell(1).value
+              // console.log(sheet.getRow(rowNum).getCell(1).value)
+              if (sheet.getRow(rowNum).getCell(1).value.match(/under/gi)) {
+                bet.team = `${sheet.getRow(rowNum - 2).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toUpperCase()}`
               }
-              else if (sheet.getRow(rowNum).getCell(1).value === "OVER") {
-                bet.team = sheet.getRow(rowNum - 3).getCell(1).value + " " + sheet.getRow(rowNum).getCell(1).value
+              else if (sheet.getRow(rowNum).getCell(1).value.match(/over/gi)) {
+                bet.team = `${sheet.getRow(rowNum - 3).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toUpperCase()}`
               }
               else {
                 bet.team = sheet.getRow(rowNum).getCell(1).value
