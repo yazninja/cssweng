@@ -1,5 +1,5 @@
-import { app, nativeTheme, ipcMain } from 'electron'
-import { EFFECT, PARAMS, MicaBrowserWindow as BrowserWindow } from 'mica-electron';
+import { app, nativeTheme, BrowserWindow, ipcMain } from 'electron'
+import { EFFECT, PARAMS, MicaBrowserWindow } from 'mica-electron';
 import path from 'path'
 import { readFile } from 'fs/promises'
 import ExcelJS from 'exceljs'
@@ -19,31 +19,51 @@ try {
 
 let mainWindow
 
+if(os.release().split('.')[2] >= 22000) {
+  app.commandLine.appendSwitch("enable-transparent-visuals");
+}
+
 function createWindow() {
   /**
    * Initial window options
    */
-  mainWindow = new BrowserWindow({
-    icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
-    width: 1000,
-    height: 600,
-    useContentSize: true,
-    effect: EFFECT.BACKGROUND.MICA,
-    theme: PARAMS.THEME.AUTO,
-    autoHideMenuBar: true,
-    show: false,
-    webPreferences: {
-      contextIsolation: true,
-      // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
-      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD)
-    }
-  })
-  mainWindow.setMenuBarVisibility(false)
+  if(os.release().split('.')[2] >= 22000) {
+  mainWindow = new MicaBrowserWindow({
+      icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
+      width: 1000,
+      height: 600,
+      useContentSize: true,
+      effect: EFFECT.BACKGROUND.MICA,
+      theme: PARAMS.THEME.AUTO,
+      autoHideMenuBar: true,
+      show: false,
+      webPreferences: {
+        contextIsolation: true,
+        // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
+        preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD)
+      }
+    })
+    mainWindow.setMenuBarVisibility(false)
+    mainWindow.webContents.once('dom-ready', () => {
+      mainWindow.show();
+    });
+  }
+  else {
+    mainWindow = new BrowserWindow({
+      icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
+      width: 1000,
+      height: 600,
+      useContentSize: true,
+      autoHideMenuBar: true,
+      webPreferences: {
+        contextIsolation: true,
+        // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
+        preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD)
+      }
+    })
+  }
+  
   mainWindow.loadURL(process.env.APP_URL)
-
-  mainWindow.webContents.once('dom-ready', () => {
-    mainWindow.show();
-  });
 
   if (process.env.DEBUGGING) {
     // if on DEV or Production with debug enabled
@@ -144,9 +164,9 @@ ipcMain.handle('loadXlsx', async (event, path) => {
 })
 */
 
-ipcMain.handle('getThemeMode', async (event) => {
-  return nativeTheme.shouldUseDarkColors
-})
+// ipcMain.handle('getThemeMode', async (event) => {
+//   return nativeTheme.shouldUseDarkColors
+// })
 
 // ipcMain.handle('summarizeData', async (event, data) => {
 //   data.forEach(sheet => {

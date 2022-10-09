@@ -1,7 +1,7 @@
 <template>
   <div class="q-gutter-md row items-start">
     <q-file
-      v-model="model"
+      :v-model="model"
       :label="placeholder"
       filled
       counter
@@ -31,8 +31,10 @@ export default defineComponent({
             type: String,
             default: 'Input Excel File'
         },
-        model
-        
+        model: {
+            type: Object,
+            default: null
+        },
     },
     setup() {
         const $q = useQuasar();
