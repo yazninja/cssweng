@@ -6,8 +6,7 @@ import ExcelJS from 'exceljs'
 import os from 'os'
 import { event } from 'quasar';
 import { default as summarizeData }from './handlers/summarizeData.js'
-
-import loadXlsx from './handlers/loadXlsx.js'
+import { loadXlsx } from './handlers/loadXlsx.js'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -149,9 +148,9 @@ ipcMain.handle('getThemeMode', async (event) => {
   return nativeTheme.shouldUseDarkColors
 })
 
-ipcMain.handle('summarizeData', async (event, data) => {
-  data.forEach(sheet => {
-    console.log(sheet.name, sheet.rowCount, sheet.columnCount, sheet.state)
-  });
-})
+// ipcMain.handle('summarizeData', async (event, data) => {
+//   data.forEach(sheet => {
+//     console.log(sheet.name, sheet.rowCount, sheet.columnCount, sheet.state)
+//   });
+// })
 
