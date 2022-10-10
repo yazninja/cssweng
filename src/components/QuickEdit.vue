@@ -1,9 +1,11 @@
 <template>
   <q-select
-    bg-color="white"
     filled
+    :dark="dark"
+    dense
+    clearable
     v-model="currPlayer"
-    :options="playerNames"
+    :options="optionsFn()"
     label="Quick Edit"
   />
 
@@ -13,6 +15,7 @@
     :title="titleFn"
     :rows-per-page-options="[]"
     row-key="day"
+    :dark="dark"
     dense
     :pagination="{ rowsPerPage: 20 }"
     >
@@ -81,16 +84,32 @@ import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "QuickEdit",
-  props: {},
+  props: {
+    players: {
+      type: Object,
+      required: true,
+    },
+    dark: {
+            type: Boolean,
+            default: false
+        }
+  },
   setup() {
     const $q = useQuasar();
     return {
+      currPlayer: ref(null),
+      optionsFn() {
+        return this.players.map((p, index) =>
+          Object({ label: p.name, value: index })
+        );
+      },
       titleFn({ currPlayer }) {
         return `${currPlayer.label} 's bets [t: ${players[currPlayer.value].tong}% | c: ${players[currPlayer.value].comm}%]`;
       },
     };
   },
   async mounted() {
+    const $q = useQuasar();
     this.darkMode = $q.dark.isActive;
   },
 });

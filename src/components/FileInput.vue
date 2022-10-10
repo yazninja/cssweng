@@ -6,11 +6,12 @@
       filled
       counter
       clearable
+      :loading="busy"
       :dark="dark"
       :counter-label="counterLabelFn"
       accept=".xlsx"
       style="width: 400px; margin-bottom: 20px"
-      @update:model-value="parseXlsx(file)"
+      @update:model-value="changeFile()"
       @clear="clearFile()"
     >
       <template v-slot:prepend>
@@ -42,6 +43,10 @@ export default defineComponent({
         dark: {
             type: Boolean,
             default: false
+        },
+        busy: {
+            type: Boolean,
+            default: false
         }
     },
     setup() {
@@ -55,28 +60,12 @@ export default defineComponent({
           counterLabelFn({ totalSize, filesNumber }) {
             return filesNumber < 1 ? "" : totalSize;
           },
-          async parseXlsx(f) {
-              console.log(f)
-                players = await window.ipcRenderer.invoke("loadXlsx", f.path);
-                if(this.players?.error && this.players?.errorType == "error") {
-                    this.errorMessage = this.players.error;
-                    this.errorType = this.players.errorType;
-                    this.showError = true;
-                    this.files = null;
-                    players = null;
-                    return;
-                }
-                else if(this.players?.error && this.players?.errorType == "warning") {
-                    this.errorMessage = this.players.error;
-                    this.errorType = this.players.errorType;
-                    this.showError = true;
-                }
-                this.playerNames = this.players.map((p, index) =>
-                    Object({ label: p.name, value: index })
-                );
-                console.log(this.players);
-                console.log(this.playerNames);
-            }
+          changeFile() {
+            this.$emit("changeFile", this.file);
+          },
+          clearFile() {
+            this.$emit("clearFile");
+          }
         }
     },
     async mounted() {

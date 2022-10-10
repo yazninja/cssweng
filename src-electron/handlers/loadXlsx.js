@@ -6,7 +6,7 @@ import ExcelJS from "exceljs";
 async function loadPlayers(workbook) {
   let players = [];
   let playWorksheet = workbook.getWorksheet("Jojo Bettors")
-
+  if(!playWorksheet) return { error: "No Jojo Bettors sheet found" }
   // Search each row for data in non-empty cells and add into players
   playWorksheet.eachRow(row => {
     if (row._cells[0].value === null) return
