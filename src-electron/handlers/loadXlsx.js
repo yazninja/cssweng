@@ -71,7 +71,7 @@ async function loadPlayerData(players) {
 }
 
 // Initialize days
-async function loadDays(workbook) {
+export async function loadDays(workbook) {
   // load player data from specific days
   let dayWorksheets = [];
   let daysRegex = /\b((mon|tue|wed(nes)?|thu(rs)?|fri|sat(ur)?|sun)(day)?)\b/gi
@@ -95,8 +95,8 @@ export async function loadXlsx(path) {
 
     let players = await loadPlayers(wb)
 
-    console.log(`Loaded ${players.length} players`)
-    console.log(players[0].bets)
+    //console.log(`Loaded ${players.length} players`)
+    //console.log(players[0].bets)
     return players
   })
 }

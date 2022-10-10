@@ -5,7 +5,7 @@ import { readFile } from 'fs/promises'
 import ExcelJS from 'exceljs'
 import os from 'os'
 import { event } from 'quasar';
-import { default as summarizeData } from './handlers/summarizeData.js'
+import { compileData } from './handlers/compileData.js'
 import { loadXlsx } from './handlers/loadXlsx.js'
 
 // needed in case process is undefined under Linux
@@ -106,9 +106,9 @@ ipcMain.handle('getThemeMode', async (event, arg) => {
 ipcMain.handle('isMica', async (event, arg) => {
   return os.release().split('.')[2] >= 22000;
 })
-summarizeData(); // basically just call the funtion/s
 
-loadXlsx(path);
+let players = loadXlsx(path);
+compileData(players) // still broken
 
 // ipcMain.handle('summarizeData', async (event, data) => {
 //   data.forEach(sheet => {
