@@ -20,11 +20,14 @@ console.log("Preload script loaded")
 contextBridge.exposeInMainWorld('ipcRenderer', {
     send: async (channel, data) => ipcRenderer.send(channel, data),
     receive: async (channel, func) => {
-        let validChannels = ['loadXlsxReply']
+        let validChannels = ['loadXlsxReply', 'theme-changed']
         if (validChannels.includes(channel)) {
           // Deliberately strip event as it includes `sender`
+          console.log("ipcRenderer.receive", channel, func);
           ipcRenderer.on(channel, (event, ...args) => func(...args))
         }
-      },
+    },
+    getThemeMode: async () => ipcRenderer.invoke('getThemeMode'),
+
     invoke: async (channel, data) => ipcRenderer.invoke(channel, data)
 })
