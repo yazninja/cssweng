@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center column">
+  <q-page dark class="flex flex-center column">
     <!-- File Input Component -->
     <div class="q-gutter-md row items-start">
       <q-file
@@ -161,7 +161,7 @@
 import { defineComponent, ref } from "vue";
 import { useQuasar } from "quasar";
 export default defineComponent({
-  name: "IndexPage",
+  name: "IndexPageOld",
   setup() {
     const $q = useQuasar();
     return {
