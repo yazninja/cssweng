@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
+import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'FileInput',
@@ -38,6 +38,19 @@ export default defineComponent({
     secondaryLabel: {
       type: String,
       default: 'Check For Errors'
+    }
+  },
+  setup() {
+    return {
+      async compileData() {
+        this.busy = true;
+        setTimeout(() => {
+          this.busy = false;
+        }, 1000);
+        console.log("Compiling Data");
+        this.errorMessage = "Lorem Ispum Dolor Sit Amet";
+        this.showError = true;
+      }
     }
   }
 })

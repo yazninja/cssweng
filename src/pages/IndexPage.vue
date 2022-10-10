@@ -31,6 +31,8 @@ export default defineComponent({
     components: {
         FileInput,
         QuickEdit,
+        ActionButtons,
+        DialogueComp
     },
     setup() {
         const $q = useQuasar()
@@ -39,10 +41,14 @@ export default defineComponent({
         })
 
         return {
+            dialogCompiled: ref(false),
+            dialogErrors: ref(false),
             files: ref(null),
             players: ref(null),
+            errorMessage: ref(null),
             darkMode: ref(false),
             isMica: ref(false),
+            showError: ref(false),
         }
     },
     async mounted() {
