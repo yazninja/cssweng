@@ -7,6 +7,8 @@
         <div v-if="players && !busy" class="q-gutter-sm">
             <QuickEdit></QuickEdit>
         </div>
+        <ActionButtons> </ActionButtons>
+        <DialogueComp placeholder="Data Compiled" :model="dialogCompiled"></DialogueComp>
     </q-page>
 </template>
 
@@ -22,23 +24,31 @@ import { useQuasar } from 'quasar'
 
 import FileInput from "../components/FileInput.vue";
 import QuickEdit from "../components/QuickEdit.vue";
+import ActionButtons from "../components/ActionButtons.vue"
+import DialogueComp from "../components/DialogueComp.vue";
 export default defineComponent({
     name: "IndexPage",
     components: {
         FileInput,
         QuickEdit,
+        ActionButtons,
+        DialogueComp
     },
     setup() {
         const $q = useQuasar()
         watch(() => $q.dark.isActive, val => {
             console.log(val ? 'On dark mode' : 'On light mode')
         })
-        
+
         return {
+            dialogCompiled: ref(false),
+            dialogErrors: ref(false),
             files: ref(null),
             players: ref(null),
+            errorMessage: ref(null),
             darkMode: ref(false),
             isMica: ref(false),
+            showError: ref(false),
         }
     },
     async mounted() {
@@ -51,7 +61,7 @@ export default defineComponent({
         window.ipcRenderer.invoke("isMica").then( async (arg) => {
             this.isMica = arg;
         });
-        
+
     },
 });
 </script>
