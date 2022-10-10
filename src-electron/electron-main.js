@@ -108,11 +108,4 @@ ipcMain.handle('isMica', async (event, arg) => {
 })
 
 let players = loadXlsx(path);
-compileData(players) // still broken
-
-// ipcMain.handle('summarizeData', async (event, data) => {
-//   data.forEach(sheet => {
-//     console.log(sheet.name, sheet.rowCount, sheet.columnCount, sheet.state)
-//   });
-// })
-
+compileData(players)

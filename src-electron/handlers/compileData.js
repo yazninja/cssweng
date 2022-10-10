@@ -22,15 +22,17 @@ async function summarySetup(workbook) {
   return summarySheet
 }
 
-// still broken
+// TODO: get days from day worksheets
 export async function compileData(data) {
   ipcMain.handle('compileData', async (event, data) => {
 
-    let sheet = summarySetup(wb2)
+    data = JSON.parse(data)
+    let sheet = await summarySetup(wb2)
     //let days = loadDays(wb).map(day => { return day.name })
     let days = ["Mon", "Tue", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] //for testing
     let rowIndex = 10
     days.forEach(day => {
+      //console.log(data)
       data.forEach(player => {
         player.bets.forEach(bet => {
           if (day == bet.day) {
@@ -55,8 +57,8 @@ export async function compileData(data) {
         })
       })
     })
+    await wb2.xlsx.writeFile("./public/test.xlsx")
   })
-  await wb2.xlsx.writeFile("./public/test.xlsx")
 }
 
 const wb2 = new ExcelJS.Workbook()

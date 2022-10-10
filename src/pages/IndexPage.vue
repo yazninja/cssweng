@@ -10,9 +10,9 @@
                 <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
                 <ActionButton color="secondary" label="Check For Errors" @click="handleButtonClick($event)"/>
             </div>
-            
+
         </div>
-        
+
         <DialogueComp placeholder="Data Compiled" :model="dialogCompiled"></DialogueComp>
     </q-page>
 </template>
@@ -68,7 +68,7 @@ export default defineComponent({
                 this.showError = false;
                 this.busy = false;
 
-                
+
             },
             handleWarning() {
                 let message = this.players.warning;
@@ -91,7 +91,7 @@ export default defineComponent({
             async handleButtonClick(e) {
                 if(e == "Data Compile") {
                     this.busy = true;
-                    await window.ipcRenderer.invoke("compileData", this.players);
+                    await window.ipcRenderer.invoke("compileData", JSON.stringify(this.players));
                     this.busy = false;
                     this.dialogCompiled = true;
                 }
