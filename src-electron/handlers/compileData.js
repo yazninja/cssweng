@@ -22,14 +22,12 @@ async function summarySetup(workbook) {
   return summarySheet
 }
 
-// TODO: get days from day worksheets
 export async function compileData(data) {
   ipcMain.handle('compileData', async (event, data) => {
 
     data = JSON.parse(data)
     let sheet = await summarySetup(wb2)
-    //let days = loadDays(wb).map(day => { return day.name })
-    let days = ["Mon", "Tue", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] //for testing
+    let days = loadDays().map(day => { return day.name })
     let rowIndex = 10
     days.forEach(day => {
       //console.log(data)

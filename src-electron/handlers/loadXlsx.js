@@ -24,7 +24,7 @@ async function loadPlayers(workbook) {
 //Loading player bet data
 async function loadPlayerData(players) {
 
-  let dayWorksheets = await loadDays(wb)
+  let dayWorksheets = await loadDays()
 
   dayWorksheets.forEach(sheet => {
     //Get 1st row headers and get only names found in Jojo Bettors sheet (formula uses data from Jojo Bettors)
@@ -71,15 +71,15 @@ async function loadPlayerData(players) {
 }
 
 // Initialize days
-export async function loadDays(workbook) {
+export function loadDays() {
   // load player data from specific days
   let dayWorksheets = [];
   let daysRegex = /\b((mon|tue|wed(nes)?|thu(rs)?|fri|sat(ur)?|sun)(day)?)\b/gi
 
   // Search and add days to dayWorksheets
   // TODO: remove undefined element at the end of dayWorksheets array
-  workbook.eachSheet((sheet, id) => {
-    if ((sheet.name !== undefined) && sheet.name.match(daysRegex)) dayWorksheets.push(workbook.getWorksheet(id))
+  wb.eachSheet((sheet, id) => {
+    if ((sheet.name !== undefined) && sheet.name.match(daysRegex)) dayWorksheets.push(wb.getWorksheet(id))
   })
 
   //console.log(dayWorksheets.forEach((s, i) => {console.log(s.name + i)}))
