@@ -49,10 +49,10 @@ async function loadPlayerData(players) {
               bet.day = sheet.name.substring(0, 3);
               // console.log(sheet.getRow(rowNum).getCell(1).value)
               if (sheet.getRow(rowNum).getCell(1).value.match(/under/gi)) {
-                bet.team = `${sheet.getRow(rowNum - 2).getCell(1).value} ${sheet.getRow(rowNum).getCell(1).value.toLowerCase()}`
+                bet.team = `${sheet.getRow(rowNum - 2).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toLowerCase()}`
               }
               else if (sheet.getRow(rowNum).getCell(1).value.match(/over/gi)) {
-                bet.team = `${sheet.getRow(rowNum - 3).getCell(1).value} ${sheet.getRow(rowNum).getCell(1).value.toLowerCase()}`
+                bet.team = `${sheet.getRow(rowNum - 3).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toLowerCase()}`
               }
               else {
                 bet.team = sheet.getRow(rowNum).getCell(1).value
