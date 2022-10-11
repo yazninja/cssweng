@@ -49,10 +49,10 @@ async function loadPlayerData(players) {
               bet.day = sheet.name.substring(0, 3);
               // console.log(sheet.getRow(rowNum).getCell(1).value)
               if (sheet.getRow(rowNum).getCell(1).value.match(/under/gi)) {
-                bet.team = `${sheet.getRow(rowNum - 2).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toUpperCase()}`
+                bet.team = `${sheet.getRow(rowNum - 2).getCell(1).value} ${sheet.getRow(rowNum).getCell(1).value.toLowerCase()}`
               }
               else if (sheet.getRow(rowNum).getCell(1).value.match(/over/gi)) {
-                bet.team = `${sheet.getRow(rowNum - 3).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toUpperCase()}`
+                bet.team = `${sheet.getRow(rowNum - 3).getCell(1).value} ${sheet.getRow(rowNum).getCell(1).value.toLowerCase()}`
               }
               else {
                 bet.team = sheet.getRow(rowNum).getCell(1).value
@@ -62,11 +62,10 @@ async function loadPlayerData(players) {
                 bet.team = bet.team.substring(0, 3) + bet.team.substring(bet.team.lastIndexOf(" "), bet.team.length)
               }
 
-              bet.result = sheet.getRow(rowNum).getCell(3).value
+              //TODO: obtain cell value from sep 12 mike foreign 269k amount (need to access formula)
+              bet.amount = cell.value;
+              bet.result = sheet.getRow(rowNum).getCell(3).value.toLowerCase()
 
-
-              //TODO: obtain cell value from sep 12 mike foreign 269k amount (something with formula)
-              bet.amount = cell.value
               player.bets.push(bet)
             }
 
