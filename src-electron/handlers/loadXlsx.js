@@ -57,8 +57,16 @@ async function loadPlayerData(players) {
               else {
                 bet.team = sheet.getRow(rowNum).getCell(1).value
               }
+
+              if (bet.team.includes("/")) {
+                bet.team = bet.team.substring(0, 3) + bet.team.substring(bet.team.lastIndexOf(" "), bet.team.length)
+              }
+
               bet.result = sheet.getRow(rowNum).getCell(3).value
-              bet.amount = cell.value;
+
+
+              //TODO: obtain cell value from sep 12 mike foreign 269k amount (something with formula)
+              bet.amount = cell.value
               player.bets.push(bet)
             }
 
