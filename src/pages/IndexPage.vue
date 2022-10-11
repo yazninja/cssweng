@@ -22,7 +22,7 @@
         background-color: #1d1d1d;
     }
     .actionDiv {
-        width: 400px;
+        width: 500px;
     }
 </style>
 

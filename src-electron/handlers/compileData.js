@@ -1,6 +1,7 @@
 import ExcelJS from 'exceljs'
 import { ipcMain } from 'electron';
 import { loadDays } from "./loadXlsx.js"
+import { dialog } from 'electron/remote';
 
 // SUMMARY SHEET SETUP
 async function summarySetup(workbook) {
@@ -55,7 +56,21 @@ export async function compileData(data) {
         })
       })
     })
-    await wb2.xlsx.writeFile("./public/test.xlsx")
+    let now = new Date().toISOString();
+    let options = {
+      title: "Save Excel File",
+      defaultPath : now,
+      buttonLabel : "Compile Data",
+
+      filters :[
+          {name: 'xlsx', extensions: ['xlsx']}
+      ]
+  };
+    dialog.showSaveDialog(null, options).then(async({ filePath }) => {
+      await wb2.xlsx.writeFile(filePath)
+    });
+
+    
   })
 }
 

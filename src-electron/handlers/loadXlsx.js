@@ -46,22 +46,22 @@ async function loadPlayerData(players) {
           column.eachCell((cell, rowNum) => {
             if (typeof (cell.value) == "number") {
               let bet = {};
-              bet.day = sheet.name
-              bet.amount = cell.value;
-              if (sheet.getRow(rowNum).getCell(1).value === 'UNDER') {
-                bet.teamExtra = sheet.getRow(rowNum).getCell(1).value
-                bet.team = sheet.getRow(rowNum - 2).getCell(1).value
+              bet.day = sheet.name;
+              // console.log(sheet.getRow(rowNum).getCell(1).value)
+              if (sheet.getRow(rowNum).getCell(1).value.match(/under/gi)) {
+                bet.team = `${sheet.getRow(rowNum - 2).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toUpperCase()}`
               }
-              else if (sheet.getRow(rowNum).getCell(1).value === "OVER") {
-                bet.teamExtra = sheet.getRow(rowNum).getCell(1).value
-                bet.team = sheet.getRow(rowNum - 3).getCell(1).value
+              else if (sheet.getRow(rowNum).getCell(1).value.match(/over/gi)) {
+                bet.team = `${sheet.getRow(rowNum - 3).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toUpperCase()}`
               }
               else {
                 bet.team = sheet.getRow(rowNum).getCell(1).value
               }
               bet.result = sheet.getRow(rowNum).getCell(3).value
+              bet.amount = cell.value;
               player.bets.push(bet)
             }
+
           })
         }
       })
