@@ -46,7 +46,7 @@ async function loadPlayerData(players) {
           column.eachCell((cell, rowNum) => {
             if (typeof (cell.value) == "number") {
               let bet = {};
-              bet.day = sheet.name;
+              bet.day = sheet.name.substring(0, 3);
               // console.log(sheet.getRow(rowNum).getCell(1).value)
               if (sheet.getRow(rowNum).getCell(1).value.match(/under/gi)) {
                 bet.team = `${sheet.getRow(rowNum - 2).getCell(1).value} / ${sheet.getRow(rowNum).getCell(1).value.toUpperCase()}`

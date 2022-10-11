@@ -1,6 +1,6 @@
 <template>
     <q-page class="flex flex-center column" :class="!isMica && darkMode && 'dark'">
-        <FileInput placeholder="Input Excel File" :dark="darkMode" :busy="busy" @changeFile="parseXlsx($event)"></FileInput>
+        <FileInput placeholder="Input Excel File" :dark="darkMode" :busy="busy" @changeFile="parseXlsx($event)" @clearFile="clearVariables()"></FileInput>
         <div v-if="file && (!players || busy)">
             <q-spinner-cube color="green" size="2em" />
         </div>
@@ -74,6 +74,12 @@ export default defineComponent({
                 let message = this.players.warning;
                 console.log(`Warning: ${message}`);
                 this.busy = false;
+            },
+            clearVariables() {
+              this.file = null
+              this.model = null
+              this.busy = false
+              this.players = null
             },
             async parseXlsx(f) {
                 this.file = f;
