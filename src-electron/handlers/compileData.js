@@ -10,16 +10,32 @@ async function summarySetup(workbook) {
   summarySheet.getRow(8, 9).fill = {
     type: 'pattern',
     pattern: 'solid',
-    bgColor: { argb: 'FFFFFF00' },
-    fgColor: { argb: "FFFFFF" }
+    fgColor: { argb: "FFFF00" }
+  };
+  summarySheet.getRow(8, 9).border = {
+    top: {style:'thin'},
+    left: {style:'thin'},
+    bottom: {style:'thin'},
+    right: {style:'thin'}
   };
 
   summarySheet.getCell("E8").value = { formula: "SUM(E10:E1000)" }
+  summarySheet.getCell("E8").numFmt = '[$₱-3409]#,##0.00'
+
   summarySheet.getCell("F8").value = { formula: "SUM(F10:F1000)" }
+  summarySheet.getCell("F8").numFmt = '[$₱-3409]#,##0.00'
+
   summarySheet.getCell("G8").value = { formula: "SUM(G10:G1000)" }
+  summarySheet.getCell("G8").numFmt = '[$₱-3409]#,##0.00'
+
   summarySheet.getCell("H8").value = { formula: "SUM(H10:H1000)" }
+  summarySheet.getCell("H8").numFmt = '[$₱-3409]#,##0.00'
+
   summarySheet.getCell("I8").value = { formula: "SUM(I10:I1000)" }
+  summarySheet.getCell("I8").numFmt = '[$₱-3409]#,##0.00'
+
   summarySheet.getCell("J8").value = { formula: "SUM(H8:I8)" }
+  summarySheet.getCell("J8").numFmt = '[$₱-3409]#,##0.00'
   return summarySheet
 }
 
@@ -46,6 +62,21 @@ export async function compileData(data) {
             // Initialize each row
             let rowData = [bet.day, player.name, team, bet.result, bet.amount, winLose, tong, total, comm, player.comm, result]
             sheet.getRow(rowIndex).values = rowData
+            sheet.getRow(rowIndex).outlineLevel = 1;
+
+            sheet.getRow(rowIndex).getCell(4).dataValidation = {
+              type: 'list',
+              allowBlank: false,
+              formulae: ['"win,lose"']
+            }
+            sheet.getRow(rowIndex).getCell(5).numFmt = '[$₱-3409]#,##0.00'
+            sheet.getRow(rowIndex).getCell(6).numFmt = '[$₱-3409]#,##0.00'
+            sheet.getRow(rowIndex).getCell(7).numFmt = '[$₱-3409]#,##0.00'
+            sheet.getRow(rowIndex).getCell(8).numFmt = '[$₱-3409]#,##0.00'
+            sheet.getRow(rowIndex).getCell(9).numFmt = '[$₱-3409]#,##0.00'
+
+            sheet.getRow(rowIndex).getCell(11).numFmt = '[$₱-3409]#,##0.00'
+
 
             // Change com% column values to percentage format
             sheet.getCell(rowIndex, 10).numFmt = '0.00%'
@@ -59,18 +90,18 @@ export async function compileData(data) {
     let now = new Date().toISOString();
     let options = {
       title: "Save Excel File",
-      defaultPath : now,
-      buttonLabel : "Compile Data",
+      defaultPath: now,
+      buttonLabel: "Compile Data",
 
-      filters :[
-          {name: 'xlsx', extensions: ['xlsx']}
+      filters: [
+        { name: 'xlsx', extensions: ['xlsx'] }
       ]
-  };
-    dialog.showSaveDialog(null, options).then(async({ filePath }) => {
-      await wb2.xlsx.writeFile(filePath)
+    };
+    dialog.showSaveDialog(null, options).then(async ({ filePath }) => {
+      await wb2.xlsx.writeFile(filePath).catch(err => console.log(err))
     });
 
-    
+
   })
 }
 
