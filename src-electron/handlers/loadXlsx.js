@@ -96,16 +96,17 @@ export function loadDays() {
 }
 
 
-export async function loadXlsx(path) {
+export async function loadXlsx(path, bw) {
   ipcMain.handle('loadXlsx', async (event, path) => {
     let excelFile = await readFile(path).catch(err => console.log(err))
+    
     //const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(excelFile);
-
     let players = await loadPlayers(wb)
-
+    bw.webContents.send('notify', {message: "Loaded Excel File", color: "positive", timeout: 5000})
     //console.log(`Loaded ${players.length} players`)
     //console.log(players[0].bets)
+    console.log(bw);
     return players
   })
 }

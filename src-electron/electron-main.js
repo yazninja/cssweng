@@ -82,7 +82,8 @@ function createWindow() {
     mainWindow.webContents.send('theme-changed', nativeTheme.shouldUseDarkColors)
   })
 
-
+  let players = loadXlsx(path, mainWindow);
+  compileData(players, mainWindow)
 
 }
 
@@ -107,5 +108,4 @@ ipcMain.handle('isMica', async (event, arg) => {
   return os.release().split('.')[2] >= 22000;
 })
 
-let players = loadXlsx(path);
-compileData(players)
+

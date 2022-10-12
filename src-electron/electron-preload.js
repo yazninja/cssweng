@@ -20,7 +20,7 @@ console.log("Preload script loaded")
 contextBridge.exposeInMainWorld('ipcRenderer', {
     send: async (channel, data) => ipcRenderer.send(channel, data),
     receive: async (channel, func) => {
-        let validChannels = ['loadXlsxReply', 'theme-changed']
+        let validChannels = ['loadXlsxReply', 'theme-changed', 'notify']
         if (validChannels.includes(channel)) {
           // Deliberately strip event as it includes `sender`
           console.log("ipcRenderer.receive", channel, func);
