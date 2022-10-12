@@ -44,7 +44,8 @@ async function loadPlayerData(players) {
           //Access specific columns belonging to each player based on their index
           let column = sheet.getColumn(p.index)
           column.eachCell((cell, rowNum) => {
-            if (typeof (cell.value) == "number") {
+            // avoids header row, checks if cell.value is not null and if the cell data is relevant (avoids amount cell if there is no team in same row)
+            if (rowNum > 1 && !!cell.value && !!sheet.getCell(rowNum, 1).value) {
               let bet = {};
               bet.day = sheet.name.substring(0, 3);
               // console.log(sheet.getRow(rowNum).getCell(1).value)
@@ -62,8 +63,9 @@ async function loadPlayerData(players) {
                 bet.team = bet.team.substring(0, 3) + bet.team.substring(bet.team.lastIndexOf(" "), bet.team.length)
               }
 
-              //TODO: obtain cell value from sep 12 mike foreign 269k amount (need to access formula)
-              bet.amount = cell.value;
+
+              if (typeof (cell.value) == "number") bet.amount = cell.value
+              else bet.amount = cell.value.result
               bet.result = sheet.getRow(rowNum).getCell(3).value.toLowerCase()
 
               player.bets.push(bet)
