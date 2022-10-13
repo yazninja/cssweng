@@ -82,8 +82,8 @@ function createWindow() {
     mainWindow.webContents.send('theme-changed', nativeTheme.shouldUseDarkColors)
   })
 
-  let players = loadXlsx(path, mainWindow);
-  compileData(players, mainWindow)
+  loadXlsx(mainWindow);
+  compileData(mainWindow)
 
 }
 

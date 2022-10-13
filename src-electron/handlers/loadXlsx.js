@@ -86,7 +86,6 @@ export function loadDays() {
   let daysRegex = /\b((mon|tue|wed(nes)?|thu(rs)?|fri|sat(ur)?|sun)(day)?)\b/gi
 
   // Search and add days to dayWorksheets
-  // TODO: remove undefined element at the end of dayWorksheets array
   wb.eachSheet((sheet, id) => {
     if ((sheet.name !== undefined) && sheet.name.match(daysRegex)) dayWorksheets.push(wb.getWorksheet(id))
   })
@@ -96,14 +95,13 @@ export function loadDays() {
 }
 
 
-export async function loadXlsx(path, bw) {
+export async function loadXlsx(bw) {
   ipcMain.handle('loadXlsx', async (event, path) => {
     let excelFile = await readFile(path).catch(err => console.log(err))
-    
-    //const wb = new ExcelJS.Workbook();
+
     await wb.xlsx.load(excelFile);
     let players = await loadPlayers(wb)
-    bw.webContents.send('notify', {message: "Loaded Excel File", color: "positive", timeout: 5000})
+    bw.webContents.send('notify', { message: "Loaded Excel File", color: "positive", timeout: 5000 })
     //console.log(`Loaded ${players.length} players`)
     //console.log(players[0].bets)
     console.log(bw);
