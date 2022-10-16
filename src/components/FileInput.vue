@@ -9,6 +9,7 @@
       :loading="busy"
       :dark="dark"
       :counter-label="counterLabelFn"
+      :error="error"
       accept=".xlsx"
       style="width: 400px; margin-bottom: 20px"
       @update:model-value="changeFile()"
@@ -45,6 +46,10 @@ export default defineComponent({
             default: false
         },
         busy: {
+            type: Boolean,
+            default: false
+        },
+        error: {
             type: Boolean,
             default: false
         }
