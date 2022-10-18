@@ -1,9 +1,8 @@
 import { app, nativeTheme, BrowserWindow, ipcMain } from 'electron'
-import { VALUE, PARAMS, MicaBrowserWindow } from 'mica-electron';
+import { VALUE, PARAMS, MicaBrowserWindow } from 'mica-electron'
 import path from 'path'
-import { readdirSync } from 'fs'
 import os from 'os'
-import { event } from 'quasar';
+import { loadExcelFile, compileData, crossCheck, loadSummary } from './handlers/excel-utils.js'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -17,7 +16,7 @@ try {
 let mainWindow
 
 if (os.release().split('.')[2] >= 22000) {
-    app.commandLine.appendSwitch("enable-transparent-visuals");
+    app.commandLine.appendSwitch('enable-transparent-visuals');
 }
 
 function createWindow() {
@@ -75,20 +74,26 @@ function createWindow() {
         mainWindow = null
     })
 
-    nativeTheme.on("updated", () => {
+    nativeTheme.on('updated', () => {
         mainWindow.webContents.send('theme-changed', nativeTheme.shouldUseDarkColors)
     })
 
-    // Dynamically import handlers
-    const handlerFolder = readdirSync('.handlers/');
-    handlerFolder.forEach(async (file) => {
-        const handler = await import(`./handlers/${file}`);
-        ipcMain.handle(`${handler.channel}`, handler.execute(event, bw, ...args))
-    });
+    // IPC handlers for Excel Opertations (hard coded for security purposes)
+    ipcMain.handle('xlsx', async(event, args) => {
+        switch (args.handler) {
+            case 'loadXlsx':
+                return await loadExcelFile(mainWindow, ...args.params);
+            case 'compileData':
+                return await compileData(mainWindow, ...args.params);
+            case 'crossCheck':
+                return await crossCheck(mainWindow, ...args.params);
+            case 'loadSummary':
+                return await loadSummary(mainWindow, ...args.params);
+        }
+    })
 }
 
 app.whenReady().then(createWindow)
-
 app.on('window-all-closed', () => {
     if (platform !== 'darwin') {
         app.quit()
@@ -101,10 +106,10 @@ app.on('activate', () => {
     }
 })
 
-ipcMain.handle('getThemeMode', async (event, arg) => {
+ipcMain.handle('getThemeMode', async () => {
     return nativeTheme.shouldUseDarkColors;
 })
-ipcMain.handle('isMica', async (event, arg) => {
+ipcMain.handle('isMica', async () => {
     return os.release().split('.')[2] >= 22000;
 })
 

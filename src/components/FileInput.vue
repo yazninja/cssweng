@@ -24,7 +24,7 @@
 
 <script>
 import { defineComponent, ref, watch } from 'vue'
-import { useQuasar } from "quasar";
+import { useQuasar } from 'quasar';
 
 export default defineComponent({
     name: 'FileInput',
@@ -63,19 +63,19 @@ export default defineComponent({
           darkMode: ref(false),
           file: ref(null),
           counterLabelFn({ totalSize, filesNumber }) {
-            return filesNumber < 1 ? "" : totalSize;
+            return filesNumber < 1 ? '' : totalSize;
           },
           changeFile() {
-            this.$emit("changeFile", this.file);
+            this.$emit('changeFile', this.file);
           },
           clearFile() {
-            this.$emit("clearFile");
+            this.$emit('clearFile');
           }
         }
     },
     async mounted() {
         const $q = useQuasar();
-        console.log("File Input Dark?",$q.dark.isActive)
+        console.log('File Input Dark?',$q.dark.isActive)
         this.darkMode = $q.dark.isActive;
     },      
 })

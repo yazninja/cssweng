@@ -12,10 +12,11 @@
     "typescript",
     "vue"
   ],
+  "typescript.tsdk": "node_modules/typescript/lib",
   "[vue]": {
     "editor.defaultFormatter": "octref.vetur"
   },
-  "[javascript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   }
 }

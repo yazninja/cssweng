@@ -122,11 +122,11 @@
 }
 </style>
 <script>
-import { defineComponent, ref } from "vue";
-import { useQuasar } from "quasar";
+import { defineComponent, ref } from 'vue';
+import { useQuasar } from 'quasar';
 
 export default defineComponent({
-  name: "QuickEdit",
+  name: 'QuickEdit',
   props: {
     players: {
       type: Object,
@@ -138,13 +138,12 @@ export default defineComponent({
         }
   },
   setup() {
-    const $q = useQuasar();
     return {
       currPlayer: ref(null),
 
-      formatter: new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "PHP",
+      formatter: new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'PHP',
       }),
       optionsFn() {
         return this.players.map((p, index) =>
