@@ -31,3 +31,10 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 
     invoke: async (channel, data) => ipcRenderer.invoke(channel, data)
 })
+contextBridge.exposeInMainWorld('version', {
+    electron: process.versions.electron,
+    chrome: process.versions.chrome,
+    platform: `${process.platform} (${process.getSystemVersion()})`,
+    arch: process.arch,
+    appVersion:  `${process.env.npm_package_productName} v${process.env.npm_package_version} ${process.env.NODE_ENV.toUpperCase()}`,
+})
