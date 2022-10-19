@@ -12,6 +12,8 @@ export const loadExcelFile = async (bw, path) => {
 }
 
 export const compileData = async (bw, mode, path, bettors) => {
+        
+    let ogWorkbook = await convertToWorkbook(path)
     let workbook;
     let now = new Date().toISOString().split('T')[0];
     let options = {
@@ -21,7 +23,7 @@ export const compileData = async (bw, mode, path, bettors) => {
         filters: [{ name: 'xlsx', extensions: ['xlsx'] }]
     };
     if(mode === 'edit'){
-        workbook = await convertToWorkbook(path)
+        workbook = ogWorkbook
         let summarysheet = workbook.getWorksheet('Jojo Personal')
         if (summarysheet) {
             bw.webContents.send('notify', { message: 'Jojo Personal sheet found, overwriting', color: 'warning', timeout: 5000 })
@@ -32,7 +34,7 @@ export const compileData = async (bw, mode, path, bettors) => {
         workbook = new ExcelJS.Workbook()
     }
     await initializeSummarySheet(workbook)
-    await appendSummaryData(workbook, JSON.parse(bettors))
+    await appendSummaryData(ogWorkbook, workbook, JSON.parse(bettors))
     if(mode === 'new') {
         dialog.showSaveDialog(bw, options).then(async ({ filePath }) => {
             await workbook.xlsx.writeFile(filePath).then(() => {
@@ -115,8 +117,8 @@ async function initializeSummarySheet(workbook) {
     return summarySheet
 }
 
-async function appendSummaryData(workbook, bettors) {
-    let days = loadDays(workbook).map(day => day.name.substring(0,3))
+async function appendSummaryData(og, workbook, bettors) {
+    let days = loadDays(og).map(day => day.name.substring(0,3))
     let rowIndex = 10;
     let sheet = workbook.getWorksheet('Jojo Personal')
     // iterate through days (mon, tues, etc)
@@ -129,14 +131,14 @@ async function appendSummaryData(workbook, bettors) {
 
                     // Initialize each row
                     let rowData = [bet.day, player.name, bet.team, bet.result, bet.amount,
-                    { formula: `IF(D${rowIndex}='win',E${rowIndex},-E${rowIndex})` },
+                    { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})` },
                     { formula: `IF(F${rowIndex}>0,E${rowIndex}*0.1, 0)` },
                     { formula: `F${rowIndex}-G${rowIndex}` },
                     { formula: `E${rowIndex}*J${rowIndex}` },
                     player.comm,
                     { formula: `H${rowIndex}+I${rowIndex}` }
                     ]
-
+                    console.log("ROW DATA", rowIndex, rowData)
                     sheet.getRow(rowIndex).values = rowData
 
                     //data validation for result column

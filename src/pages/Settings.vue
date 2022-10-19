@@ -6,7 +6,22 @@
         </q-toolbar>
         <div class="flex column q-pa-md">
             <div class="text-h6 alias-title" :class="darkMode && 'text-white'">
-                <span>Custom Alias (for script 2)</span>
+                <div class="flex">
+                    Custom Alias (for script 2)
+                    <q-file
+                        v-model="aliasFile"
+                        class="q-ml-md"
+                        :dark="darkMode"
+                        :label="aliasFile ? aliasFile.name : 'Bettor Aliases JSON'"
+                        accept=".json"
+                        :loading="fileLoading"
+                        filled dense clearable
+                        @input="onAliasFileInput">
+                        <template v-slot:prepend>
+                            <q-icon name="mdi-code-json" />
+                        </template>
+                    </q-file>
+                </div>
                 <q-separator :dark="darkMode" spaced="lg"/>
             </div>
             <q-table v-if="store.getBettors() != []"
@@ -66,21 +81,21 @@
 
 <script>
 import { defineComponent, ref } from 'vue';
-import { useQuasar } from 'quasar'
 import { UseBettorStore } from 'stores/jojo-bettors';
 
 export default defineComponent({
     name: 'SettingsPage',
     setup() {
-        const $q = useQuasar()
         const store = UseBettorStore();
         console.log(store.getBettors())
         
         return {
             store,
+            aliasFile: ref(null),
             currAliasee: ref(null),
             darkMode: ref(false),
             newAlias: ref(false),
+            fileLoading: ref(false),
 
             
             getFilteredBettors() {
@@ -94,6 +109,10 @@ export default defineComponent({
                 let bIndex = bettors.findIndex(b => b.name == bettor)
                 bettors[bIndex].alias = alias
                 store.setBettors(bettors)
+            },
+            onAliasFileInput(file) {
+                this.fileLoading = true;
+                console.log(file)
             }
         }
     },

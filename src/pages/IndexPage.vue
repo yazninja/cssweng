@@ -88,6 +88,7 @@ export default defineComponent({
               this.busy=true;
               if(!f) return this.clearVariables();
               this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [f.path]});
+              console.log("PLAYERS:",this.players);
               let bettorsTable = await window.ipcRenderer.invoke('xlsx', {handler: 'loadSummary', params: [f.path]});
               store.setBettors(bettorsTable);
               console.log(store.getBettors())
