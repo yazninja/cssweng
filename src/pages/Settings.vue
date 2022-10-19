@@ -1,6 +1,6 @@
 <template>
     <q-page class="q-pa-md q-gutter-y-sm">
-        <q-toolbar class="text-white">
+        <q-toolbar :class="darkMode && 'text-white'">
             <q-btn flat round icon="arrow_back_ios_new" to="/" />
             <q-toolbar-title>Settings</q-toolbar-title>
         </q-toolbar>
