@@ -73,11 +73,14 @@ function createWindow() {
     mainWindow.on('closed', () => {
         mainWindow = null
     })
-
     nativeTheme.on('updated', () => {
         mainWindow.webContents.send('theme-changed', nativeTheme.shouldUseDarkColors)
     })
-
+    ipcMain.handle('getAppVersion', async() => {
+        console.log('getAppVersion', `${app.getName()} v${app.getVersion()} ${process.env.NODE_ENV.toUpperCase()}`);
+        return `${app.getName()} v${app.getVersion()} ${process.env.NODE_ENV.toUpperCase()}`
+    })
+    
     // IPC handlers for Excel Opertations (hard coded for security purposes)
     ipcMain.handle('xlsx', async(event, args) => {
         switch (args.handler) {

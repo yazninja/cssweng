@@ -38,8 +38,8 @@
         class="alias-table"
       />
       <q-separator :dark="darkMode" spaced="lg" />
-      <div class="text-h6 flex cloumn">
-        <div class="alias-title text-bold">{{ window.version.appVersion }}</div>
+      <div class="text-h6 flex cloumn " :class="darkMode && 'text-white'">
+        <div class="alias-title text-bold">{{ getAppVersion() }}</div>
         <div class="flex column text-body2">
           <span>Electron: {{ window.version.electron }}</span>
           <span>Chrome: {{ window.version.chrome }}</span>
@@ -139,6 +139,7 @@ export default defineComponent({
       newAlias: ref(false),
       fileLoading: ref(false),
       release: ref(null),
+      releaseAppVer: ref(null),
       window: window,
 
       getFilteredBettors() {
@@ -159,9 +160,15 @@ export default defineComponent({
         this.fileLoading = true;
         console.log(file);
       },
+      getAppVersion() {
+        return window.version.appVersion == 'null' ? this.releaseAppVer : window.version.appVersion;
+      }
     };
   },
   async mounted() {
+    await window.ipcRenderer.invoke('getAppVersion').then((res) => {
+      this.releaseAppVer = res;
+    })
     await window.ipcRenderer
       .getThemeMode()
       .then((res) => (this.darkMode = res));

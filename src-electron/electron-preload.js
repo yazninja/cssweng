@@ -28,7 +28,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
         }
     },
     getThemeMode: async () => ipcRenderer.invoke('getThemeMode'),
-
+    getAppVersion: async () => ipcRenderer.invoke('getAppVersion'),
     invoke: async (channel, data) => ipcRenderer.invoke(channel, data)
 })
 contextBridge.exposeInMainWorld('version', {
@@ -36,5 +36,6 @@ contextBridge.exposeInMainWorld('version', {
     chrome: process.versions.chrome,
     platform: `${process.platform} (${process.getSystemVersion()})`,
     arch: process.arch,
-    appVersion:  `${process.env.npm_package_productName} v${process.env.npm_package_version} ${process.env.NODE_ENV.toUpperCase()}`,
+    appVersion:  `${process.env.npm_package_productName ? `${process.env.npm_package_productName} v${process.env.npm_package_version} ${process.env.NODE_ENV.toUpperCase()}` : 'null'}`,
+    process: process,
 })
