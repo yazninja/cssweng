@@ -33,7 +33,7 @@
 <script>
 import { defineComponent, ref, watch } from 'vue';
 import { useQuasar } from 'quasar'
-import { UseBettorStore } from 'stores/jojo-bettors'; 
+import { UseBettorStore } from 'stores/jojo-bettors';
 
 import FileInput from '../components/FileInput.vue';
 import QuickEdit from '../components/QuickEdit.vue';
@@ -47,8 +47,8 @@ export default defineComponent({
       QuickEdit,
       ActionButton,
   },
-  
-  setup() {  
+
+  setup() {
       const $q = useQuasar()
       console.log(store.getBettors())
       watch(() => $q.dark.isActive, val => {
@@ -83,16 +83,22 @@ export default defineComponent({
               notif()
             }
           },
+          dismiss() {
+            this.busy = false
+            this.showError = false
+          },
           async parseXlsx(f) {
               this.file = f;
               this.busy=true;
               if(!f) return this.clearVariables();
               this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [f.path]});
               console.log("PLAYERS:",this.players);
-              let bettorsTable = await window.ipcRenderer.invoke('xlsx', {handler: 'loadSummary', params: [f.path]});
-              store.setBettors(bettorsTable);
-              console.log(store.getBettors())
-              if(!this.players) return this.handleError();
+              if (this.players) {
+                let bettorsTable = await window.ipcRenderer.invoke('xlsx', {handler: 'loadSummary', params: [f.path]});
+                store.setBettors(bettorsTable);
+                console.log(store.getBettors())
+              }
+              else if (!this.players) return this.handleError();
               this.busy = false;
           },
           async handleButtonClick(e) {
@@ -105,7 +111,7 @@ export default defineComponent({
                       actions: [
                           { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
                           { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
-                          { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); dismiss()} }
+                          { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
                       ]
                   })
               }
