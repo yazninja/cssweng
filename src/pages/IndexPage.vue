@@ -116,8 +116,9 @@ export default defineComponent({
                   })
               }
               else if(e == 'Check For Errors') {
+                let bettors = store.getBettors();
                   this.busy = true;
-                  this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path]});
+                  this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path, JSON.stringify(bettors)]});
                   this.busy = false;
               }
           },

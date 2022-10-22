@@ -3,6 +3,7 @@ import { VALUE, PARAMS, MicaBrowserWindow } from 'mica-electron'
 import path from 'path'
 import os from 'os'
 import { loadExcelFile, compileData, crossCheck, loadSummary } from './handlers/excel-utils.js'
+import { parseAlias } from './handlers/alias-utils.js'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform()
@@ -93,6 +94,9 @@ function createWindow() {
             case 'loadSummary':
                 return await loadSummary(mainWindow, ...args.params);
         }
+    })
+    ipcMain.handle('parseAlias', async(event, args) => {
+        return await parseAlias(mainWindow, ...args.params);
     })
 }
 

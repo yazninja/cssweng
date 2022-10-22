@@ -1,6 +1,6 @@
 {
   "name": "cssweng3",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "A Quasar Project",
   "productName": "Sports Betting Data Compiler",
   "author": "yazninja <yazlesean@gmail.com>",
@@ -18,7 +18,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "exceljs": "^4.3.0",
-    "mica-electron": "^1.1.4",
+    "mica-electron": "^1.1.5",
     "pinia": "^2.0.11",
     "quasar": "^2.6.0",
     "vue": "^3.0.0",
@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@quasar/app-vite": "^1.0.0",
-    "@types/node": "^18.11.2",
+    "@types/node": "^18.11.3",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
     "@typescript-eslint/parser": "^5.40.1",
     "@vue/devtools": "^6.4.5",
@@ -34,7 +34,7 @@
     "electron": "^21.2.0",
     "electron-builder": "^23.6.0",
     "electron-rebuild": "^3.2.9",
-    "eslint": "^8.10.0",
+    "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^9.0.0",
     "prettier": "^2.5.1",

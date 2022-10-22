@@ -86,9 +86,13 @@ export const compileData = async (bw, mode, path, bettors) => {
   }
 };
 
-export const crossCheck = async (jojoPath) => {
-  console.log('crosscheck', jojoPath);
-};
+export const crossCheck = async (bw, jojoPath, aliases) => {
+    // console.log(jojoPath)
+    let workbook = await convertToWorkbook(jojoPath)
+    let jojoSummaryData = await loadJojoSummary(workbook.getWorksheet('Summary'))
+    let weeklySummaryData = await openWeeklySummary(bw);
+    await replaceWithAliases(weeklySummaryData, aliases)
+}
 
 export const loadSummary = async (bw, path) => {
   let workbook = await convertToWorkbook(path);
@@ -108,6 +112,19 @@ export const loadSummary = async (bw, path) => {
   columnA.forEach((p) => players.push({ name: p, alias: p }));
   return players;
 };
+
+async function replaceWithAliases(summary, aliases) {
+    let aliasList = JSON.parse(aliases)
+    summary.forEach((bettor) => {
+        aliasList.forEach((alias) => {
+            if(bettor.name == alias.alias.split(',')[0] || bettor.name == alias.alias.split(',')[1]) {
+                bettor.name = alias.name;
+            }
+        })
+    })
+    console.log(summary)
+    return summary
+}
 
 async function initializeSummarySheet(workbook) {
   let summarySheet = workbook.addWorksheet('Jojo Personal', {
@@ -195,6 +212,66 @@ function initializeTestData(player, bet) {
   return test;
 }
 
+async function loadJojoSummary(summarySheet) {
+    let summary = []
+    let total;
+    summarySheet.eachRow((row) => {
+        if(row.getCell('A').value?.formula?.includes('Bettors Table')){
+            let bettor = {
+                name: row.getCell('A').value.result,
+                net: row.getCell('B').value.result || 0,
+                mon: row.getCell('E').value.result || 0,
+                tue: row.getCell('F').value.result || 0,
+                wed: row.getCell('G').value.result || 0,
+                thu: row.getCell('H').value.result || 0,
+                fri: row.getCell('I').value.result || 0,
+                sat: row.getCell('J').value.result || 0,
+                sun: row.getCell('K').value.result || 0,
+            }
+            summary.push(bettor)
+        }
+    })
+    return summary
+}
+// async function replaceWithAlias(summary) {
+// }
+async function openWeeklySummary(bw) {
+    let workbook;
+    let summary;
+    let options = {
+        title: 'Open Weekly Summary Sheet',
+        buttonLabel: 'Cross-Check Data',
+        filters: [{ name: 'Microsoft Excel Worksheet', extensions: ['xlsx'] }],
+    }
+
+    await dialog.showOpenDialog(bw, options).then(async ({ filePaths }) => {
+        console.log(filePaths)
+        workbook = await convertToWorkbook(filePaths[0])
+        let summarySheet = workbook.getWorksheet('Summary')
+        summary = await loadWeeklySummary(summarySheet)
+    })
+    return summary
+}
+async function loadWeeklySummary(summarySheet) {
+    let summary = []
+    summarySheet.eachRow((row) => {
+        if(row.getCell('A').value?.formula?.includes('Greed is Good players')){
+            let bettor = {
+                name: row.getCell('A').value.result,
+                net: row.getCell('C').value.result || 0,
+                mon: row.getCell('D').value.result || 0,
+                tue: row.getCell('E').value.result || 0,
+                wed: row.getCell('F').value.result || 0,
+                thu: row.getCell('G').value.result || 0,
+                fri: row.getCell('H').value.result || 0,
+                sat: row.getCell('I').value.result || 0,
+                sun: row.getCell('J').value.result || 0,
+            }
+            summary.push(bettor)
+        }
+    })
+    return summary
+}
 async function appendSummaryData(og, workbook, bettors) {
   let days = loadDays(og).map((day) => day.name.substring(0, 3));
   let rowIndex = 10;
