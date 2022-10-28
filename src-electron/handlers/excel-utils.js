@@ -179,7 +179,6 @@ async function initializeSummarySheet(workbook) {
   return summarySheet;
 }
 
-//TODO:
 function initializeTestData(player, bet) {
   let winLose = bet.result.includes('lose') ? bet.amount * -1 : bet.amount;
   let tong = bet.result.includes('lose') ? 0 : winLose * player.tong;
@@ -260,7 +259,6 @@ async function appendSummaryData(og, workbook, bettors) {
   });
   sheet.autoFilter = 'A9:K9';
 
-  // TODO: fix spaghetti error checking
   //console.log('TESTDATA', testData);
 
   let compareSheet = og.getWorksheet('Jojo summary');
