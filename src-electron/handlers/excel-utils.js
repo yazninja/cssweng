@@ -179,7 +179,9 @@ async function initializeSummarySheet(workbook) {
   return summarySheet;
 }
 
+//Used in error checking (comparing the initialized data with data from the Jojo Summary sheet)
 function initializeTestData(player, bet) {
+  // variables follow the same formula logic used in rowData initialization
   let winLose = bet.result.includes('lose') ? bet.amount * -1 : bet.amount;
   let tong = bet.result.includes('lose') ? 0 : winLose * player.tong;
   let result = winLose - tong + bet.amount * player.comm;
@@ -259,8 +261,10 @@ async function appendSummaryData(og, workbook, bettors) {
   });
   sheet.autoFilter = 'A9:K9';
 
+  // Error checking starts here
   //console.log('TESTDATA', testData);
 
+  // access Jojo Summary worksheet for comparing data
   let compareSheet = og.getWorksheet('Jojo summary');
 
   // look for headers & totals row
@@ -290,19 +294,22 @@ async function appendSummaryData(og, workbook, bettors) {
   });
   //console.log(list);
 
+  // total net value of all players from Jojo Summary sheet and from calculating from the compiled data
   let netCompare = compareSheet.getCell(totalsRowIndex, 2).value.result;
   let netCompiled = testData.reduce((total, val) => total + val.subtotal, 0);
+
+  // error counter used for displaying the errors in different cells (2 is starting row cell)
   let errorCtr = 2;
 
-  console.log(netCompare, netCompiled);
+  //console.log(netCompare, netCompiled);
 
-  //compare values
+  //compares values and checks for errors
   if (netCompare == netCompiled) {
     sheet.getCell(1, 1).value = 'No errors found';
   } else {
     sheet.getCell(2, 1).value = 'Error: ';
     sheet.getCell(3, 1).value = 'Correction: ';
-    //compare each player's net with compiled data
+    // if total net of all players are not equal, compare net of each player to look for the error
     list.forEach((player, i) => {
       if (player.name == compareSheet.getRow(i + testRowIndex).getCell(1)) {
         let playerNet = 0;
@@ -311,7 +318,8 @@ async function appendSummaryData(og, workbook, bettors) {
             playerNet += data.subtotal;
           }
         });
-        // if compiled data's player net is not = to actual player net, then check player's net per day
+        // if net of a certain player is not the same as the value in Jojo Summary sheet,
+        // look through the player's win/loss in each day
         if (
           playerNet !==
           compareSheet.getRow(i + testRowIndex).getCell(2).value.result
@@ -328,6 +336,8 @@ async function appendSummaryData(og, workbook, bettors) {
                 dayNet += data.subtotal;
               }
             });
+            // if the compiled win/loss value in a certain day is not equal to the value in the Jojo Summary sheet,
+            // display the error and correct values along with the player name and specific day on top of the compiled data sheet
             if (dayNet != compareSheet.getRow(testRowIndex + i).getCell(day)) {
               sheet.getCell(1, errorCtr).value = `${
                 compareSheet.getRow(testRowIndex - 1).getCell(day).value.result
