@@ -5,12 +5,19 @@
       <div v-if="file && (!players || busy)">
           <q-spinner-cube color="green" size="2em" />
       </div>
-      <div v-if="players && !busy" class="actionDiv q-gutter-sm">
+      <div v-if="players && !busy && !errorChecking" class="actionDiv q-gutter-sm">
           <QuickEdit :dark="darkMode" :players="players"></QuickEdit>
           <div class="flex flex-center" style="gap: 10px">
               <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
               <ActionButton color="secondary" label="Check For Errors" @click="handleButtonClick($event)"/>
           </div>
+      </div>
+      <div v-if="errorChecking && errors" class="actionDiv q-gutter-sm">
+        <ErrorTable :dark="darkMode" :errors="errors"></ErrorTable>
+        <div class="flex flex-center" style="gap: 10px">
+          <ActionButton color="primary" label="Compile With Errors" @click="handleButtonClick($event)"/>
+          <ActionButton color="secondary" label="Cancel" @click="handleButtonClick($event)"/>
+        </div>
       </div>
   </q-page>
 </template>
@@ -37,7 +44,9 @@ import { UseBettorStore } from 'stores/jojo-bettors';
 
 import FileInput from '../components/FileInput.vue';
 import QuickEdit from '../components/QuickEdit.vue';
-import ActionButton from '../components/ActionButtons.vue'
+import ActionButton from '../components/ActionButtons.vue';
+import ErrorTable from '../components/ErrorTable.vue';
+
 let notif;
 const store = UseBettorStore();
 export default defineComponent({
@@ -46,6 +55,7 @@ export default defineComponent({
       FileInput,
       QuickEdit,
       ActionButton,
+      ErrorTable
   },
 
   setup() {
@@ -62,6 +72,8 @@ export default defineComponent({
           darkMode: ref(false),
           isMica: ref(false),
           showError: ref(false),
+          errorChecking: ref(false),
+          errors: ref(null),
 
           handleError() {
               this.showError = true;
@@ -79,6 +91,8 @@ export default defineComponent({
             this.busy = false
             this.players = null
             this.showError = false
+            this.errorChecking = false
+            this.errors = null
             if(notif) {
               notif()
             }
@@ -102,18 +116,42 @@ export default defineComponent({
               this.busy = false;
           },
           async handleButtonClick(e) {
-              this.busy = true;
+              //this.busy = true;
               if(e == 'Data Compile') {
+                this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'checkErrors', params: [this.file.path, JSON.stringify(this.players)]});
+
+                if (this.errors.length > 0) {
+                  this.errorChecking = true;
+                  console.log("errors: ", this.errors)
+                }
+                else {
                   notif = $q.notify({
-                      message: 'Where would you want to export the data?',
-                      color: 'primary',
-                      timeout: 0,
-                      actions: [
-                          { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
-                          { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
-                          { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
-                      ]
+                    message: 'Where would you want to export the data?',
+                    color: 'primary',
+                    timeout: 0,
+                    actions: [
+                        { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
+                        { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
+                        { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
+                    ]
                   })
+                }
+              }
+              else if (e == 'Compile With Errors') {
+                notif = $q.notify({
+                    message: 'Where would you want to export the data?',
+                    color: 'primary',
+                    timeout: 0,
+                    actions: [
+                        { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
+                        { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
+                        { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
+                    ]
+                })
+              }
+              else if (e == 'Cancel') {
+                this.errorChecking = false
+                this.errors = null
               }
               else if(e == 'Check For Errors') {
                 let bettors = store.getBettors();

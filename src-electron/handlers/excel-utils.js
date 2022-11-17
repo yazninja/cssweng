@@ -8,6 +8,7 @@ export const loadExcelFile = async (bw, path) => {
   let bettors = await loadJojoBettors(workbook, bw);
   if (!bettors) return;
   await appendBets(bettors, workbook);
+  //console.log(bettors);
   return bettors;
 };
 
@@ -35,6 +36,7 @@ export const compileData = async (bw, mode, path, bettors) => {
   } else if (mode === 'new') {
     workbook = new ExcelJS.Workbook();
   }
+
   await initializeSummarySheet(workbook);
   await appendSummaryData(ogWorkbook, workbook, JSON.parse(bettors));
   if (mode === 'new') {
@@ -87,12 +89,12 @@ export const compileData = async (bw, mode, path, bettors) => {
 };
 
 export const crossCheck = async (bw, jojoPath, aliases) => {
-    // console.log(jojoPath)
-    let workbook = await convertToWorkbook(jojoPath)
-    let jojoSummaryData = await loadJojoSummary(workbook.getWorksheet('Summary'))
-    let weeklySummaryData = await openWeeklySummary(bw);
-    await replaceWithAliases(weeklySummaryData, aliases)
-}
+  // console.log(jojoPath)
+  let workbook = await convertToWorkbook(jojoPath);
+  let jojoSummaryData = await loadJojoSummary(workbook.getWorksheet('Summary'));
+  let weeklySummaryData = await openWeeklySummary(bw);
+  await replaceWithAliases(weeklySummaryData, aliases);
+};
 
 export const loadSummary = async (bw, path) => {
   let workbook = await convertToWorkbook(path);
@@ -114,16 +116,19 @@ export const loadSummary = async (bw, path) => {
 };
 
 async function replaceWithAliases(summary, aliases) {
-    let aliasList = JSON.parse(aliases)
-    summary.forEach((bettor) => {
-        aliasList.forEach((alias) => {
-            if(bettor.name == alias.alias.split(',')[0] || bettor.name == alias.alias.split(',')[1]) {
-                bettor.name = alias.name;
-            }
-        })
-    })
-    console.log(summary)
-    return summary
+  let aliasList = JSON.parse(aliases);
+  summary.forEach((bettor) => {
+    aliasList.forEach((alias) => {
+      if (
+        bettor.name == alias.alias.split(',')[0] ||
+        bettor.name == alias.alias.split(',')[1]
+      ) {
+        bettor.name = alias.name;
+      }
+    });
+  });
+  console.log(summary);
+  return summary;
 }
 
 async function initializeSummarySheet(workbook) {
@@ -196,87 +201,206 @@ async function initializeSummarySheet(workbook) {
   return summarySheet;
 }
 
-//TODO:
-function initializeTestData(player, bet) {
-  let winLose = bet.result.includes('lose') ? bet.amount * -1 : bet.amount;
-  let tong = bet.result.includes('lose') ? 0 : winLose * player.tong;
-  let result = winLose - tong + bet.amount * player.comm;
-  let test = {
-    day: bet.day,
-    name: player.name,
-    winLose: winLose,
-    subtotal: result,
-  };
-
-  //console.log('TESTDATA', rowIndex, test);
-  return test;
-}
-
 async function loadJojoSummary(summarySheet) {
-    let summary = []
-    let total;
-    summarySheet.eachRow((row) => {
-        if(row.getCell('A').value?.formula?.includes('Bettors Table')){
-            let bettor = {
-                name: row.getCell('A').value.result,
-                net: row.getCell('B').value.result || 0,
-                mon: row.getCell('E').value.result || 0,
-                tue: row.getCell('F').value.result || 0,
-                wed: row.getCell('G').value.result || 0,
-                thu: row.getCell('H').value.result || 0,
-                fri: row.getCell('I').value.result || 0,
-                sat: row.getCell('J').value.result || 0,
-                sun: row.getCell('K').value.result || 0,
-            }
-            summary.push(bettor)
-        }
-    })
-    return summary
+  let summary = [];
+  summarySheet.eachRow((row) => {
+    if (row.getCell('A').value?.formula?.includes('Bettors Table')) {
+      let bettor = {
+        name: row.getCell('A').value.result,
+        net: row.getCell('B').value.result || 0,
+        mon: row.getCell('E').value.result || 0,
+        tue: row.getCell('F').value.result || 0,
+        wed: row.getCell('G').value.result || 0,
+        thu: row.getCell('H').value.result || 0,
+        fri: row.getCell('I').value.result || 0,
+        sat: row.getCell('J').value.result || 0,
+        sun: row.getCell('K').value.result || 0,
+      };
+      summary.push(bettor);
+    }
+  });
+  return summary;
 }
 // async function replaceWithAlias(summary) {
 // }
 async function openWeeklySummary(bw) {
-    let workbook;
-    let summary;
-    let options = {
-        title: 'Open Weekly Summary Sheet',
-        buttonLabel: 'Cross-Check Data',
-        filters: [{ name: 'Microsoft Excel Worksheet', extensions: ['xlsx'] }],
-    }
+  let workbook;
+  let summary;
+  let options = {
+    title: 'Open Weekly Summary Sheet',
+    buttonLabel: 'Cross-Check Data',
+    filters: [{ name: 'Microsoft Excel Worksheet', extensions: ['xlsx'] }],
+  };
 
-    await dialog.showOpenDialog(bw, options).then(async ({ filePaths }) => {
-        console.log(filePaths)
-        workbook = await convertToWorkbook(filePaths[0])
-        let summarySheet = workbook.getWorksheet('Summary')
-        summary = await loadWeeklySummary(summarySheet)
-    })
-    return summary
+  await dialog.showOpenDialog(bw, options).then(async ({ filePaths }) => {
+    console.log(filePaths);
+    workbook = await convertToWorkbook(filePaths[0]);
+    let summarySheet = workbook.getWorksheet('Summary');
+    summary = await loadWeeklySummary(summarySheet);
+  });
+  return summary;
 }
 async function loadWeeklySummary(summarySheet) {
-    let summary = []
-    summarySheet.eachRow((row) => {
-        if(row.getCell('A').value?.formula?.includes('Greed is Good players')){
-            let bettor = {
-                name: row.getCell('A').value.result,
-                net: row.getCell('C').value.result || 0,
-                mon: row.getCell('D').value.result || 0,
-                tue: row.getCell('E').value.result || 0,
-                wed: row.getCell('F').value.result || 0,
-                thu: row.getCell('G').value.result || 0,
-                fri: row.getCell('H').value.result || 0,
-                sat: row.getCell('I').value.result || 0,
-                sun: row.getCell('J').value.result || 0,
-            }
-            summary.push(bettor)
-        }
-    })
-    return summary
+  let summary = [];
+  summarySheet.eachRow((row) => {
+    if (row.getCell('A').value?.formula?.includes('Greed is Good players')) {
+      let bettor = {
+        name: row.getCell('A').value.result,
+        net: row.getCell('C').value.result || 0,
+        mon: row.getCell('D').value.result || 0,
+        tue: row.getCell('E').value.result || 0,
+        wed: row.getCell('F').value.result || 0,
+        thu: row.getCell('G').value.result || 0,
+        fri: row.getCell('H').value.result || 0,
+        sat: row.getCell('I').value.result || 0,
+        sun: row.getCell('J').value.result || 0,
+      };
+      summary.push(bettor);
+    }
+  });
+  return summary;
 }
+
+function initializeData(player, bet, mode) {
+  // mode = 0 : error checking mode
+  // mode > 0 : summary data initializing mode
+  if (mode == 0) {
+    let winLose = bet.result.includes('win') ? bet.amount : bet.amount * -1;
+    let tong = bet.result.includes('win') ? winLose * player.tong : 0;
+    let result = winLose - tong + bet.amount * player.comm;
+    let test = {
+      day: bet.day,
+      name: player.name,
+      winLose: winLose,
+      subtotal: result,
+    };
+
+    return test;
+  } else if (mode > 0) {
+    let rowIndex = mode;
+
+    let rowData = [
+      bet.day,
+      player.name,
+      bet.team,
+      bet.result,
+      bet.amount,
+      { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})` },
+      { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)` },
+      { formula: `F${rowIndex}-G${rowIndex}` },
+      { formula: `E${rowIndex}*J${rowIndex}` },
+      player.comm,
+      { formula: `H${rowIndex}+I${rowIndex}` },
+    ];
+
+    return rowData;
+  }
+  return 'error in compiling data';
+}
+
+export const checkErrors = async (bw, path, bettors) => {
+  let og = await convertToWorkbook(path);
+  let days = loadDays(og).map((day) => day.name.substring(0, 3));
+  let compareSheet = og.getWorksheet('Jojo summary');
+  if (!compareSheet) {
+    return bw.webContents.send('notify', {
+      type: 'negative',
+      message: 'Jojo summary sheet not found',
+      timeout: 0,
+      noClose: false,
+    });
+  }
+  let playerData = [];
+  let errorList = [];
+
+  days.forEach((day) => {
+    JSON.parse(bettors).forEach((player) => {
+      player.bets.forEach((bet) => {
+        if (day == bet.day) {
+          playerData.push(initializeData(player, bet, 0));
+        }
+      });
+    });
+  });
+  //console.log(playerData);
+
+  // look for headers & totals row
+  let totalsRowIndex, testRowIndex;
+  compareSheet.eachRow((row, i) => {
+    if (!!row.getCell(1).value && typeof row.getCell(1).value == 'string') {
+      if (row.getCell(1).value.match(/total/gi)) {
+        totalsRowIndex = i;
+      }
+    } else if (
+      !!row.getCell(2).value &&
+      typeof row.getCell(2).value == 'string'
+    ) {
+      if (row.getCell(2).value.match(/net/gi)) {
+        testRowIndex = i + 1;
+      }
+    }
+  });
+
+  let players = await loadJojoBettors(og, bw);
+
+  let netActual = compareSheet.getCell(totalsRowIndex, 2).value.result;
+  let netCompiled = playerData.reduce((total, val) => total + val.subtotal, 0);
+
+  //console.log(netActual, netCompiled);
+
+  //compare values
+  if (netActual !== netCompiled) {
+    players.forEach((player, i) => {
+      if (player.name == compareSheet.getRow(i + testRowIndex).getCell(1)) {
+        let playerNet = playerData.reduce((sum, data) => {
+          return data.name == player.name ? sum + data.subtotal : sum;
+        }, 0);
+
+        if (
+          playerNet !==
+          compareSheet.getRow(i + testRowIndex).getCell(2).value.result
+        ) {
+          for (let day = 5; day <= 11; day++) {
+            let day_winlose = playerData.reduce((sum, data) => {
+              return data.name == player.name &&
+                data.day ==
+                  compareSheet.getRow(testRowIndex - 1).getCell(day).value
+                    .result
+                ? sum + data.subtotal
+                : sum;
+            }, 0);
+
+            if (
+              day_winlose != compareSheet.getRow(testRowIndex + i).getCell(day)
+            ) {
+              let error = {
+                day: compareSheet.getRow(testRowIndex - 1).getCell(day).value
+                  .result,
+                name: player.name,
+                day_winlose: day_winlose,
+                actual_winlose: compareSheet
+                  .getRow(testRowIndex + i)
+                  .getCell(day).value.result,
+              };
+              errorList.push(error);
+            }
+          }
+        }
+      }
+    });
+    bw.webContents.send('notify', {
+      message: 'Data mismatch detected.',
+      color: 'warning',
+    });
+  }
+  console.log('ERRORS: ' + JSON.stringify(errorList));
+  return errorList;
+};
+
 async function appendSummaryData(og, workbook, bettors) {
   let days = loadDays(og).map((day) => day.name.substring(0, 3));
   let rowIndex = 10;
   let sheet = workbook.getWorksheet('Jojo Personal');
-  let testData = [];
   // iterate through days (mon, tues, etc)
   days.forEach((day) => {
     // iterate through each player's data (bong daily's bets, etc)
@@ -284,23 +408,8 @@ async function appendSummaryData(og, workbook, bettors) {
       // iterate through each specific player's bet details (amount, etc)
       player.bets.forEach((bet) => {
         if (day == bet.day) {
-          // initialize testData for error checking
-          testData.push(initializeTestData(player, bet));
-
           // Initialize each row
-          let rowData = [
-            bet.day,
-            player.name,
-            bet.team,
-            bet.result,
-            bet.amount,
-            { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})` },
-            { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)` },
-            { formula: `F${rowIndex}-G${rowIndex}` },
-            { formula: `E${rowIndex}*J${rowIndex}` },
-            player.comm,
-            { formula: `H${rowIndex}+I${rowIndex}` },
-          ];
+          let rowData = initializeData(player, bet, rowIndex);
 
           //console.log('ROW DATA', rowIndex, rowData);
           sheet.getRow(rowIndex).values = rowData;
@@ -336,92 +445,6 @@ async function appendSummaryData(og, workbook, bettors) {
     }
   });
   sheet.autoFilter = 'A9:K9';
-
-  // TODO: fix spaghetti error checking
-  //console.log('TESTDATA', testData);
-
-  let compareSheet = og.getWorksheet('Jojo summary');
-
-  // look for headers & totals row
-  let totalsRowIndex, testRowIndex;
-  compareSheet.eachRow((row, i) => {
-    if (!!row.getCell(1).value && typeof row.getCell(1).value == 'string') {
-      if (row.getCell(1).value.match(/total/gi)) {
-        totalsRowIndex = i;
-      }
-    } else if (
-      !!row.getCell(2).value &&
-      typeof row.getCell(2).value == 'string'
-    ) {
-      if (row.getCell(2).value.match(/net/gi)) {
-        testRowIndex = i + 1;
-      }
-    }
-  });
-
-  //get player list
-  let list = [];
-  let pWS = og.getWorksheet('Jojo Bettors');
-  pWS.eachRow((row) => {
-    if (!!row.getCell(1).value) {
-      list.push({ name: row.getCell(1).value });
-    }
-  });
-  //console.log(list);
-
-  let netCompare = compareSheet.getCell(totalsRowIndex, 2).value.result;
-  let netCompiled = testData.reduce((total, val) => total + val.subtotal, 0);
-  let errorCtr = 2;
-
-  console.log(netCompare, netCompiled);
-
-  //compare values
-  if (netCompare == netCompiled) {
-    sheet.getCell(1, 1).value = 'No errors found';
-  } else {
-    sheet.getCell(2, 1).value = 'Error: ';
-    sheet.getCell(3, 1).value = 'Correction: ';
-    //compare each player's net with compiled data
-    list.forEach((player, i) => {
-      if (player.name == compareSheet.getRow(i + testRowIndex).getCell(1)) {
-        let playerNet = 0;
-        testData.forEach((data) => {
-          if (data.name == player.name) {
-            playerNet += data.subtotal;
-          }
-        });
-        // if compiled data's player net is not = to actual player net, then check player's net per day
-        if (
-          playerNet !==
-          compareSheet.getRow(i + testRowIndex).getCell(2).value.result
-        ) {
-          for (let day = 5; day <= 11; day++) {
-            let dayNet = 0;
-            testData.forEach((data) => {
-              if (
-                data.name == player.name &&
-                data.day ==
-                  compareSheet.getRow(testRowIndex - 1).getCell(day).value
-                    .result
-              ) {
-                dayNet += data.subtotal;
-              }
-            });
-            if (dayNet != compareSheet.getRow(testRowIndex + i).getCell(day)) {
-              sheet.getCell(1, errorCtr).value = `${
-                compareSheet.getRow(testRowIndex - 1).getCell(day).value.result
-              }, ${player.name}`;
-              sheet.getCell(2, errorCtr).value = `${dayNet}`;
-              sheet.getCell(3, errorCtr).value = `${
-                compareSheet.getRow(testRowIndex + i).getCell(day).value.result
-              }`;
-              errorCtr++;
-            }
-          }
-        }
-      }
-    });
-  }
 }
 
 async function loadJojoBettors(workbook, bw) {
