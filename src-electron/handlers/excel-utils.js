@@ -12,7 +12,7 @@ export const loadExcelFile = async (bw, path) => {
   return bettors;
 };
 
-export const compileData = async (bw, mode, path, bettors) => {
+export const compileData = async (bw, mode, path, bettors, errors) => {
   let ogWorkbook = await convertToWorkbook(path);
   let workbook;
   let now = new Date().toISOString().split('T')[0];
@@ -38,7 +38,7 @@ export const compileData = async (bw, mode, path, bettors) => {
   }
 
   await initializeSummarySheet(workbook);
-  await appendSummaryData(ogWorkbook, workbook, JSON.parse(bettors));
+  await appendSummaryData(ogWorkbook, workbook, JSON.parse(bettors), JSON.parse(errors));
   if (mode === 'new') {
     dialog.showSaveDialog(bw, options).then(async ({ filePath }) => {
       await workbook.xlsx
@@ -397,7 +397,7 @@ export const checkErrors = async (bw, path, bettors) => {
   return errorList;
 };
 
-async function appendSummaryData(og, workbook, bettors) {
+async function appendSummaryData(og, workbook, bettors, errors) {
   let days = loadDays(og).map((day) => day.name.substring(0, 3));
   let rowIndex = 10;
   let sheet = workbook.getWorksheet('Jojo Personal');
@@ -445,6 +445,13 @@ async function appendSummaryData(og, workbook, bettors) {
     }
   });
   sheet.autoFilter = 'A9:K9';
+
+  if (errors.length > 0) {
+    sheet.getCell(1, 1).value = 'Errors: ';
+    errors.forEach((error, i) => {
+      sheet.getCell(i+1, 2).value = `${error.name} - ${error.day}`
+    })
+  }
 }
 
 async function loadJojoBettors(workbook, bw) {

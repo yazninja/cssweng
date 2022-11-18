@@ -7,15 +7,16 @@
       </div>
       <div v-if="players && !busy && !errorChecking" class="actionDiv q-gutter-sm">
           <QuickEdit :dark="darkMode" :players="players"></QuickEdit>
+          <span class="flex flex-center text-warning"> Note: Using Quick Edit automatically results in data mismatch. Use at own risk!</span>
           <div class="flex flex-center" style="gap: 10px">
               <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
               <ActionButton color="secondary" label="Check For Errors" @click="handleButtonClick($event)"/>
           </div>
       </div>
-      <div v-if="errorChecking && errors" class="actionDiv q-gutter-sm">
+      <div v-if="errorChecking" class="actionDiv q-gutter-sm">
         <ErrorTable :dark="darkMode" :errors="errors"></ErrorTable>
         <div class="flex flex-center" style="gap: 10px">
-          <ActionButton color="primary" label="Compile With Errors" @click="handleButtonClick($event)"/>
+          <ActionButton color="primary" label="Export With Errors" @click="handleButtonClick($event)"/>
           <ActionButton color="secondary" label="Cancel" @click="handleButtonClick($event)"/>
         </div>
       </div>
@@ -119,35 +120,16 @@ export default defineComponent({
               //this.busy = true;
               if(e == 'Data Compile') {
                 this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'checkErrors', params: [this.file.path, JSON.stringify(this.players)]});
-
                 if (this.errors.length > 0) {
                   this.errorChecking = true;
                   console.log("errors: ", this.errors)
                 }
                 else {
-                  notif = $q.notify({
-                    message: 'Where would you want to export the data?',
-                    color: 'primary',
-                    timeout: 0,
-                    actions: [
-                        { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
-                        { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
-                        { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
-                    ]
-                  })
+                  notif = await this.exportFile()
                 }
               }
-              else if (e == 'Compile With Errors') {
-                notif = $q.notify({
-                    message: 'Where would you want to export the data?',
-                    color: 'primary',
-                    timeout: 0,
-                    actions: [
-                        { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
-                        { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
-                        { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
-                    ]
-                })
+              else if (e == 'Export With Errors') {
+                notif = await this.exportFile()
               }
               else if (e == 'Cancel') {
                 this.errorChecking = false
@@ -160,13 +142,25 @@ export default defineComponent({
                   this.busy = false;
               }
           },
+          async exportFile() {
+            $q.notify({
+              message: 'Where would you want to export the data?',
+              color: 'primary',
+              timeout: 0,
+              actions: [
+                  { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
+                  { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
+                  { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
+              ]
+            })
+          },
           async handleExport(e) {
               if(e == 'Edit Current File') {
-                    await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['edit', this.file.path, JSON.stringify(this.players)]});
+                    await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['edit', this.file.path, JSON.stringify(this.players), JSON.stringify(this.errors)]});
                     this.busy = false;
               }
               else if(e == 'New File') {
-                  await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['new', this.file.path, JSON.stringify(this.players)]});
+                  await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['new', this.file.path, JSON.stringify(this.players), JSON.stringify(this.errors)]});
                   this.busy = false;
               }
           },
