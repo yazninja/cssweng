@@ -3,6 +3,7 @@
   "editor.guides.bracketPairs": true,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 4,
   "editor.codeActionsOnSave": [
     "source.fixAll.eslint"
   ],

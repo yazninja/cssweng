@@ -16,5 +16,5 @@ export const UseBettorStore = defineStore('jojo-bettors', () => {
     bettors.value = newBettors;
     localStorage.setItem('bettors', JSON.stringify(bettors.value));
   }
-  return {getBettors, addBettor, setBettors};
+  return { getBettors, addBettor, setBettors };
 });
