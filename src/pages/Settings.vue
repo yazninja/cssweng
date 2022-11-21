@@ -18,7 +18,7 @@
             filled
             dense
             clearable
-            @update:model-value="onAliasFileInput($event)"
+            @update:model-value="onAliasFileInput()"
           >
             <template v-slot:prepend>
               <q-icon name="mdi-code-json" />
@@ -156,11 +156,12 @@ export default defineComponent({
         bettors[bIndex].alias = alias;
         store.setBettors(bettors);
       },
-      async onAliasFileInput(file) {
+      async onAliasFileInput() {
         console.log(this.aliasFile.path);
         let aliases = await window.ipcRenderer.invoke('parseAlias',{params: [this.aliasFile.path]});
         console.log(aliases);
         store.setBettors(aliases);
+        console.log("Saved As:", store.getBettors());
       },
       getAppVersion() {
         return window.version.appVersion == 'null' ? this.releaseAppVer : window.version.appVersion;

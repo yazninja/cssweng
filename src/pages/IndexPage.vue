@@ -61,6 +61,7 @@ export default defineComponent({
   setup() {
       const $q = useQuasar()
       console.log(store.getBettors())
+
       watch(() => $q.dark.isActive, val => {
           console.log(val ? 'On dark mode' : 'On light mode')
       })
@@ -109,8 +110,10 @@ export default defineComponent({
               console.log("PLAYERS:",this.players);
               if (this.players) {
                 let bettorsTable = await window.ipcRenderer.invoke('xlsx', {handler: 'loadSummary', params: [f.path]});
-                store.setBettors(bettorsTable);
-                console.log(store.getBettors())
+                if(store.getBettors() == []) {
+                  store.setBettors(bettorsTable);
+                  console.log(store.getBettors())
+                }
               }
               else if (!this.players) return this.handleError();
               this.busy = false;
@@ -155,9 +158,10 @@ export default defineComponent({
               }
               else if(e == 'Check For Errors') {
                 let bettors = store.getBettors();
-                  this.busy = true;
-                  this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path, JSON.stringify(bettors)]});
-                  this.busy = false;
+                console.log("bettors: ", bettors);
+                this.busy = true;
+                this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path, JSON.stringify(bettors)]});
+                this.busy = false;
               }
           },
           async handleExport(e) {
