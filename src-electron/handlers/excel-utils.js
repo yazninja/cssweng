@@ -502,9 +502,16 @@ async function appendSummaryData(og, workbook, bettors, errors) {
     sheet.autoFilter = 'A9:K9';
 
     if (errors.length > 0) {
+        let currCol = 2;
         sheet.getCell(1, 1).value = 'Errors: ';
         errors.forEach((error, i) => {
-            sheet.getCell(i + 1, 2).value = `${error.name} - ${error.day}`
+            let currRow = (i + 1) % 8;
+            if (currRow == 0) {
+                currCol++;
+                sheet.getCell(currRow + 1, currCol).value = `${error.name} - ${error.day}`;
+            }
+            else
+                sheet.getCell(currRow, currCol).value = `${error.name} - ${error.day}`;
         })
     }
 }
