@@ -491,23 +491,22 @@ async function appendSummaryData(og, workbook, bettors) {
             });
         });
     });
-});
-sheet.columns.forEach((col) => {
-    col.width = 16;
-});
-sheet.columns.forEach((col, i) => {
-    if ((i >= 4 && i <= 8) || i == 10) {
-        col.width = 22;
-    }
-});
-sheet.autoFilter = 'A9:K9';
+    sheet.columns.forEach((col) => {
+        col.width = 16;
+    });
+    sheet.columns.forEach((col, i) => {
+        if ((i >= 4 && i <= 8) || i == 10) {
+            col.width = 22;
+        }
+    });
+    sheet.autoFilter = 'A9:K9';
 
-if (errors.length > 0) {
-    sheet.getCell(1, 1).value = 'Errors: ';
-    errors.forEach((error, i) => {
-        sheet.getCell(i + 1, 2).value = `${error.name} - ${error.day}`
-    })
-}
+    if (errors.length > 0) {
+        sheet.getCell(1, 1).value = 'Errors: ';
+        errors.forEach((error, i) => {
+            sheet.getCell(i + 1, 2).value = `${error.name} - ${error.day}`
+        })
+    }
 }
 
 async function loadJojoBettors(workbook, bw) {
