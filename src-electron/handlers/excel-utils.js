@@ -130,7 +130,7 @@ async function writeErrors(errors, summary) {
                 if (error.sun) row.getCell('J').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0000' } }
             }
             else {
-                delete(row.getCell('C').fill)
+                delete (row.getCell('C').fill)
             }
         })
     });
@@ -452,7 +452,6 @@ export const checkErrors = async (bw, path, bettors) => {
     return errorList;
 };
 
-<<<<<<< HEAD
 async function appendSummaryData(og, workbook, bettors) {
     let days = loadDays(og).map((day) => day.name.substring(0, 3));
     let rowIndex = 10;
@@ -466,21 +465,6 @@ async function appendSummaryData(og, workbook, bettors) {
                 if (day == bet.day) {
                     // Initialize each row
                     let rowData = initializeData(player, bet, rowIndex);
-=======
-async function appendSummaryData(og, workbook, bettors, errors) {
-  let days = loadDays(og).map((day) => day.name.substring(0, 3));
-  let rowIndex = 10;
-  let sheet = workbook.getWorksheet('Jojo Personal');
-  // iterate through days (mon, tues, etc)
-  days.forEach((day) => {
-    // iterate through each player's data (bong daily's bets, etc)
-    bettors.forEach((player) => {
-      // iterate through each specific player's bet details (amount, etc)
-      player.bets.forEach((bet) => {
-        if (day == bet.day) {
-          // Initialize each row
-          let rowData = initializeData(player, bet, rowIndex);
->>>>>>> 26a113c0bfbad0ee3b4142b269e66e7be42004e8
 
                     //console.log('ROW DATA', rowIndex, rowData);
                     sheet.getRow(rowIndex).values = rowData;
@@ -507,35 +491,23 @@ async function appendSummaryData(og, workbook, bettors, errors) {
             });
         });
     });
-<<<<<<< HEAD
-    sheet.columns.forEach((col) => {
-        col.width = 16;
-    });
-    sheet.columns.forEach((col, i) => {
-        if ((i >= 4 && i <= 8) || i == 10) {
-            col.width = 22;
-        }
-    });
-    sheet.autoFilter = 'A9:K9';
-=======
-  });
-  sheet.columns.forEach((col) => {
+});
+sheet.columns.forEach((col) => {
     col.width = 16;
-  });
-  sheet.columns.forEach((col, i) => {
+});
+sheet.columns.forEach((col, i) => {
     if ((i >= 4 && i <= 8) || i == 10) {
-      col.width = 22;
+        col.width = 22;
     }
-  });
-  sheet.autoFilter = 'A9:K9';
+});
+sheet.autoFilter = 'A9:K9';
 
-  if (errors.length > 0) {
+if (errors.length > 0) {
     sheet.getCell(1, 1).value = 'Errors: ';
     errors.forEach((error, i) => {
-      sheet.getCell(i+1, 2).value = `${error.name} - ${error.day}`
+        sheet.getCell(i + 1, 2).value = `${error.name} - ${error.day}`
     })
-  }
->>>>>>> 26a113c0bfbad0ee3b4142b269e66e7be42004e8
+}
 }
 
 async function loadJojoBettors(workbook, bw) {
