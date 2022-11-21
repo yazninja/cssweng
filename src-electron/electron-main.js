@@ -2,7 +2,7 @@ import { app, nativeTheme, BrowserWindow, ipcMain } from 'electron'
 import { VALUE, PARAMS, MicaBrowserWindow } from 'mica-electron'
 import path from 'path'
 import os from 'os'
-import { loadExcelFile, compileData, crossCheck, loadSummary } from './handlers/excel-utils.js'
+import { loadExcelFile, compileData, crossCheck, loadSummary, checkErrors } from './handlers/excel-utils.js'
 import { parseAlias } from './handlers/alias-utils.js'
 
 // needed in case process is undefined under Linux
@@ -14,7 +14,7 @@ try {
       path.join(app.getPath('userData'), 'DevTools Extensions')
     );
   }
-} catch (_) {}
+} catch (_) { }
 
 let mainWindow;
 
