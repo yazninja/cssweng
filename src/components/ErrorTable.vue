@@ -6,13 +6,43 @@
   :title="Errors"
   :rows-per-page-options="[]"
   :rows="errors"
-  row-key="day"
+  row-key="name"
   dense
   >
     <template v-slot:top>
       <div class="tableTitle text-left flex column text-weight-bold">
         {{'Errors'}}
       </div>
+    </template>
+
+    <template v-slot:header-cell-day_winlose="props">
+      <q-th :props="props">
+        {{'Compiled Win/Loss'}}
+      </q-th>
+    </template>
+
+    <template v-slot:header-cell-actual_winlose="props">
+      <q-th :props="props">
+        {{'Actual Win/Loss'}}
+      </q-th>
+    </template>
+
+    <template v-slot:body="props" >
+      <q-tr :props="props">
+        <q-td key="day" :props="props">
+          {{props.row.day}}
+        </q-td>
+        <q-td key="name" :props="props">
+          {{props.row.name}}
+        </q-td>
+
+        <q-td key="day_winlose" :props="props">
+          {{formatter.format(props.row.day_winlose)}}
+        </q-td>
+        <q-td key="actual_winlose" :props="props">
+          {{formatter.format(props.row.actual_winlose)}}
+        </q-td>
+      </q-tr>
     </template>
 
 
@@ -26,7 +56,7 @@
 </style>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import { useQuasar } from 'quasar';
 
 export default defineComponent({
