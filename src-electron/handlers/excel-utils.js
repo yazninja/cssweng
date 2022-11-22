@@ -525,6 +525,7 @@ async function loadJojoBettors(workbook, bw) {
             message: 'Jojo Bettors sheet not found',
             timeout: 0,
             noClose: true,
+            actions: [{ label: 'Dismiss', color: 'white' }]
         });
 
     playWorksheet.eachRow((row) => {
