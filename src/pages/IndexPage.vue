@@ -1,26 +1,33 @@
 <template>
-  <q-page class="flex flex-center column" :class="!isMica && darkMode && 'dark'">
-      <q-btn icon="o_settings" to="/settings" class="settings-icon" flat round :text-color="darkMode ? 'white' : 'black' " size="md" style="font-weight: 300;"/>
-      <FileInput placeholder="Input Excel File" :dark="darkMode" :busy="busy" :error="showError" @changeFile="parseXlsx($event)" @clearFile="clearVariables()"></FileInput>
-      <div v-if="file && (!players || busy)">
-          <q-spinner-cube color="green" size="2em" />
-      </div>
-      <div v-if="players && !busy && !errorChecking" class="actionDiv q-gutter-sm">
-          <QuickEdit :dark="darkMode" :players="players"></QuickEdit>
-          <span class="flex flex-center text-warning"> Note: Using Quick Edit automatically results in data mismatch. Use at own risk!</span>
-          <div class="flex flex-center" style="gap: 10px">
-              <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
-              <ActionButton color="secondary" label="Check For Errors" @click="handleButtonClick($event)"/>
-          </div>
-      </div>
-      <div v-if="errorChecking" class="actionDiv q-gutter-sm">
-        <ErrorTable :dark="darkMode" :errors="errors"></ErrorTable>
-        <div class="flex flex-center" style="gap: 10px">
-          <ActionButton color="primary" label="Export With Errors" @click="handleButtonClick($event)"/>
-          <ActionButton color="secondary" label="Cancel" @click="handleButtonClick($event)"/>
+    <q-page class="flex flex-center column" :class="!isMica && darkMode && 'dark'">
+        <q-btn icon="o_settings" to="/settings" class="settings-icon" flat round :text-color="darkMode ? 'white' : 'black' " size="md" style="font-weight: 300;"/>
+        <FileInput placeholder="Input Excel File" :dark="darkMode" :busy="busy" :error="showError" @changeFile="parseXlsx($event)" @clearFile="clearVariables()"></FileInput>
+
+        <div v-if="file && (!players || busy)">
+            <q-spinner-cube color="green" size="2em" />
         </div>
-      </div>
-  </q-page>
+
+        <div v-if="players && !busy && !errorChecking" class="actionDiv q-gutter-sm">
+            <QuickEdit :dark="darkMode" :players="players"></QuickEdit>
+            <span class="flex flex-center text-warning"> Note: Using Quick Edit automatically results in data mismatch. Use at own risk!</span>
+            <div v-if="players && bettorsTable" class="flex flex-center" style="gap: 10px">
+                <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
+                <ActionButton color="secondary" label="Check For Errors" @click="handleButtonClick($event)"/>
+            </div>
+            <!--TODO: gray out check for errors button instead-->
+            <div v-else-if="!bettorsTable" class="flex flex-center">
+                <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
+            </div>
+        </div>
+
+        <div v-if="errorChecking" class="actionDiv q-gutter-sm">
+            <ErrorTable :dark="darkMode" :errors="errors"></ErrorTable>
+            <div class="flex flex-center" style="gap: 10px">
+                <ActionButton color="primary" label="Export With Errors" @click="handleButtonClick($event)"/>
+                <ActionButton color="secondary" label="Cancel" @click="handleButtonClick($event)"/>
+            </div>
+        </div>
+    </q-page>
 </template>
 
 <style scoped>
@@ -70,6 +77,7 @@ export default defineComponent({
       return {
           file: ref(null),
           players: ref(null),
+          bettorsTable: ref(null),
           busy: ref(false),
           darkMode: ref(false),
           isMica: ref(false),
@@ -92,6 +100,7 @@ export default defineComponent({
             this.model = null
             this.busy = false
             this.players = null
+            this.bettorsTable = null
             this.showError = false
             this.errorChecking = false
             this.errors = null
@@ -107,29 +116,41 @@ export default defineComponent({
               this.file = f;
               this.busy=true;
               if(!f) return this.clearVariables();
-              this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [f.path]});
+              this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [f.path, 'loadBettors']});
+              if (!this.players) return this.handleError();
               console.log("PLAYERS:",this.players);
-              if (this.players) {
-                let bettorsTable = await window.ipcRenderer.invoke('xlsx', {handler: 'loadSummary', params: [f.path]});
-                if(store.getBettors() == []) {
-                  store.setBettors(bettorsTable);
+
+              this.bettorsTable = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [f.path, 'loadSummary']});
+              if(store.getBettors() == [] && this.bettorsTable) {
+                  store.setBettors(this.bettorsTable);
                   console.log(store.getBettors())
-                }
               }
-              else if (!this.players) return this.handleError();
+
               this.busy = false;
           },
           async handleButtonClick(e) {
               //this.busy = true;
               if(e == 'Data Compile') {
                 this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'checkErrors', params: [this.file.path, JSON.stringify(this.players)]});
-                if (this.errors.length > 0) {
+                if (!this.errors) {
+                    this.errors = []
+                    $q.notify({
+                        message: 'Jojo Summary sheet not found. Unable to check for errors',
+                        type: 'warning',
+                        multiLine: true,
+                        timeout: 0,
+                        actions: [
+                            { label: 'Proceed Anyway', color: 'black', handler: async () => {notif = await this.exportFile()}},
+                            { label: 'Cancel', color: 'black', handler: () => this.dismiss()}
+                        ]
+                    })
+                }
+                else if (this.errors.length > 0) {
                   this.errorChecking = true;
                   console.log("errors: ", this.errors)
                 }
-                else {
+                else
                   notif = await this.exportFile()
-                }
               }
               else if (e == 'Export With Errors') {
                 notif = await this.exportFile()

@@ -2,7 +2,7 @@ import { app, nativeTheme, BrowserWindow, ipcMain } from 'electron'
 import { VALUE, PARAMS, MicaBrowserWindow } from 'mica-electron'
 import path from 'path'
 import os from 'os'
-import { loadExcelFile, compileData, crossCheck, loadSummary, checkErrors } from './handlers/excel-utils.js'
+import { loadExcelFile, compileData, crossCheck, checkErrors } from './handlers/excel-utils.js'
 import { parseAlias } from './handlers/alias-utils.js'
 
 // needed in case process is undefined under Linux
@@ -98,8 +98,6 @@ function createWindow() {
         return await compileData(mainWindow, ...args.params);
       case 'crossCheck':
         return await crossCheck(mainWindow, ...args.params);
-      case 'loadSummary':
-        return await loadSummary(mainWindow, ...args.params);
       case 'checkErrors':
         return await checkErrors(mainWindow, ...args.params);
     }

@@ -2,12 +2,23 @@ import ExcelJS from 'exceljs';
 import { readFile } from 'fs/promises';
 import { shell, dialog } from 'electron';
 
-export const loadExcelFile = async (bw, path) => {
+export const loadExcelFile = async (bw, path, mode) => {
     let workbook = await convertToWorkbook(path);
-    let bettors = await loadJojoBettors(workbook, bw);
-    if (!bettors) return;
-    await appendBets(bettors, workbook);
-    return bettors;
+    let playWorksheet = workbook.getWorksheet('Jojo Bettors');
+    let summarySheet = workbook.getWorksheet('Summary');
+    if (!playWorksheet && !summarySheet) {
+        return await errorNotif(bw, 'negative', 'Jojo Bettors and Summary sheets not found')
+    }
+    else if (mode == 'loadBettors') {
+        let bettors = await loadJojoBettors(bw, workbook, playWorksheet);
+        await appendBets(bettors, workbook);
+        return bettors;
+    }
+    else if (mode == 'loadSummary') {
+        let players = await loadSummary(bw, workbook, summarySheet);
+        return players;
+    }
+
 };
 
 export const compileData = async (bw, mode, path, bettors, errors) => {
@@ -32,6 +43,7 @@ export const compileData = async (bw, mode, path, bettors, errors) => {
             workbook.removeWorksheet(summarysheet.id);
         }
     }
+
     await initializeSummarySheet(workbook);
     await appendSummaryData(ogWorkbook, workbook, JSON.parse(bettors), JSON.parse(errors));
     if (mode === 'new') {
@@ -95,25 +107,6 @@ export const crossCheck = async (bw, jojoPath, aliases) => {
     return crossCheckErrors
 }
 
-export const loadSummary = async (bw, path) => {
-    let workbook = await convertToWorkbook(path);
-    let summarySheet = workbook.getWorksheet('Summary');
-    if (!summarySheet)
-        return bw.webContents.send('notify', {
-            type: 'negative',
-            message: 'Summary sheet not found',
-            timeout: 0,
-            noClose: true,
-        });
-    let players = [];
-    let columnA = summarySheet
-        .getColumn('A')
-        .values.filter((value) => value?.formula?.includes('Bettors Table'))
-        .map((value) => value?.result);
-    columnA.forEach((p) => players.push({ name: p, alias: p }));
-    return players;
-};
-
 async function writeErrors(bw, errors, summary) {
     let sheet = summary.wb.getWorksheet('Summary');
     sheet.eachRow((row) => {
@@ -143,16 +136,16 @@ async function writeErrors(bw, errors, summary) {
         });
         shell.openExternal(path);
     })
-    .catch((err) => {
-        if (err.code == 'EBUSY') {
-            return bw.webContents.send('notify', {
-                message:
-                    "Can't save file, Make sure that it is not OPEN in another program",
-                type: 'negative',
-                timeout: 0,
-            });
-        }
-    });
+        .catch((err) => {
+            if (err.code == 'EBUSY') {
+                return bw.webContents.send('notify', {
+                    message:
+                        "Can't save file, Make sure that it is not OPEN in another program",
+                    type: 'negative',
+                    timeout: 0,
+                });
+            }
+        });
 
     return summary;
 }
@@ -375,16 +368,9 @@ export const checkErrors = async (bw, path, bettors) => {
     let og = await convertToWorkbook(path);
     let days = loadDays(og).map((day) => day.name.substring(0, 3));
     let compareSheet = og.getWorksheet('Jojo summary');
-    if (!compareSheet) {
-        return bw.webContents.send('notify', {
-            type: 'negative',
-            message: 'Jojo summary sheet not found',
-            timeout: 0,
-            noClose: false,
-        });
-    }
     let playerData = [];
     let errorList = [];
+    if (!compareSheet) return;
 
     days.forEach((day) => {
         JSON.parse(bettors).forEach((player) => {
@@ -414,7 +400,7 @@ export const checkErrors = async (bw, path, bettors) => {
         }
     });
 
-    let players = await loadJojoBettors(og, bw);
+    let players = await loadJojoBettors(og, bw, og.getWorksheet('Jojo Bettors'));
 
     let netActual = compareSheet.getCell(totalsRowIndex, 2).value.result;
     let netCompiled = playerData.reduce((total, val) => total + val.subtotal, 0);
@@ -534,18 +520,9 @@ async function appendSummaryData(og, workbook, bettors, errors) {
     }
 }
 
-async function loadJojoBettors(workbook, bw) {
+async function loadJojoBettors(bw, workbook, playWorksheet) {
     let players = [];
-    let playWorksheet = workbook.getWorksheet('Jojo Bettors');
-    if (!playWorksheet)
-        return bw.webContents.send('notify', {
-            type: 'negative',
-            message: 'Jojo Bettors sheet not found',
-            timeout: 0,
-            noClose: true,
-            actions: [{ label: 'Dismiss', color: 'white' }]
-        });
-
+    if (!playWorksheet) { return await errorNotif(bw, 'negative', 'Jojo Bettors sheet not found') }
     playWorksheet.eachRow((row) => {
         if (row._cells[0].value === null) return;
         players.push({
@@ -555,7 +532,19 @@ async function loadJojoBettors(workbook, bw) {
             bets: [],
         });
     });
+    return players;
+}
 
+async function loadSummary(bw, workbook, summarySheet) {
+    let players = [];
+    if (!summarySheet) {
+        return await errorNotif(bw, 'negative', 'Summary sheet not found')
+    }
+    let columnA = summarySheet
+        .getColumn('A')
+        .values.filter((value) => value?.formula?.includes('Bettors Table'))
+        .map((value) => value?.result);
+    columnA.forEach((p) => players.push({ name: p, alias: p }));
     return players;
 }
 
@@ -635,4 +624,23 @@ async function convertToWorkbook(path) {
     let excelFile = await readFile(path).catch((err) => console.log(err));
     await wb.xlsx.load(excelFile);
     return wb;
+}
+
+async function errorNotif(bw, type, msg) {
+    if (type == 'warning') {
+        return bw.webContents.send('notify', {
+            type: type,
+            message: msg,
+            timeout: 0,
+            actions: [{ label: 'Dismiss', color: 'black' }]
+        })
+    }
+    else if (type == 'negative') {
+        return bw.webContents.send('notify', {
+            type: type,
+            message: msg,
+            timeout: 0,
+            actions: [{ label: 'Dismiss', color: 'white' }]
+        })
+    }
 }
