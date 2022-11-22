@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center column" :class="!isMica && darkMode && 'dark'">
-      <q-btn icon="o_settings" to="/settings" class="settings-icon" flat round :text-color="darkMode ? 'white' : 'black' " size="md"/>
+      <q-btn icon="o_settings" to="/settings" class="settings-icon" flat round :text-color="darkMode ? 'white' : 'black' " size="md" style="font-weight: 300;"/>
       <FileInput placeholder="Input Excel File" :dark="darkMode" :busy="busy" :error="showError" @changeFile="parseXlsx($event)" @clearFile="clearVariables()"></FileInput>
       <div v-if="file && (!players || busy)">
           <q-spinner-cube color="green" size="2em" />
@@ -142,7 +142,16 @@ export default defineComponent({
                 let bettors = store.getBettors();
                 console.log("bettors: ", bettors);
                 this.busy = true;
-                this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path, JSON.stringify(bettors)]});
+                this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path, JSON.stringify(bettors)]});
+                if (this.errors.length > 0) {
+                  this.errors.forEach(error => {
+                    console.log(error)
+                    $q.notify({ message: `Error for ${error.name} - ${Object.keys(error).filter(e => (e != "name" && e != "net")).toString()}`, color: 'warning', timeout: 10000 })
+                  });
+                }
+                else {
+                  $q.notify({ message: 'No errors found!', type: 'positive', timeout: 2000 })
+                }
                 this.busy = false;
               }
           },
