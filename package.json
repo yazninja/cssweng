@@ -10,10 +10,12 @@
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "start": "quasar dev -m electron",
+    "build:darwin": "quasar build -m electron",
     "build": "quasar build -m electron",
     "build:debug": "quasar build -m electron -d",
     "build:release": "quasar build -m electron -P always",
-    "postinstall:win32": "electron-rebuild"
+    "postinstall": "electron-rebuild",
+    "preinstall": "node preinstall.js"
   },
   "dependencies": {
     "@quasar/extras": "^1.15.6",
