@@ -10,14 +10,17 @@
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "start": "quasar dev -m electron",
+    "build:darwin": "quasar build -m electron",
     "build": "quasar build -m electron",
     "build:debug": "quasar build -m electron -d",
     "build:release": "quasar build -m electron -P always",
-    "postinstall:win32": "electron-rebuild"
+    "postinstall": "electron-rebuild",
+    "preinstall": "node preinstall.js"
   },
   "dependencies": {
     "@quasar/extras": "^1.15.6",
     "exceljs": "^4.3.0",
+    "mica-electron": "^1.1.6",
     "pinia": "^2.0.25",
     "quasar": "^2.10.2",
     "vue": "^3.2.45",
@@ -37,7 +40,6 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-vue": "^9.7.0",
     "prettier": "^2.7.1",
-    "mica-electron": "^1.1.6",
     "typescript": "^4.9.3"
   },
   "engines": {

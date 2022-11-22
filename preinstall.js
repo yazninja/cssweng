@@ -1,0 +1,4 @@
+// if on mac or linux, run the preinstall script
+if (process.platform !== 'win32') {
+  exec('npm remove mica-electron')
+}
