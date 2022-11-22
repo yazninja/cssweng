@@ -11,7 +11,7 @@
       :counter-label="counterLabelFn"
       :error="error"
       accept=".xlsx"
-      style="width: 400px; margin-bottom: 20px"
+      style="width: 90vw; margin-bottom: 20px; max-width: 450px;"
       @update:model-value="changeFile()"
       @clear="clearFile()"
     >
@@ -77,6 +77,6 @@ export default defineComponent({
         const $q = useQuasar();
         console.log('File Input Dark?',$q.dark.isActive)
         this.darkMode = $q.dark.isActive;
-    },      
+    },
 })
 </script>

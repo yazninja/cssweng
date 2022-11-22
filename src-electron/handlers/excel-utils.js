@@ -90,8 +90,9 @@ export const crossCheck = async (bw, jojoPath, aliases) => {
     let weeklySummary = await openWeeklySummary(bw);
     await replaceWithAliases(weeklySummary.data, aliases)
     let crossCheckErrors = await compareData(jojoSummaryData, weeklySummary.data)
-    await writeErrors(crossCheckErrors, weeklySummary)
+    await writeErrors(bw, crossCheckErrors, weeklySummary)
     shell.openExternal(weeklySummary.path);
+    return crossCheckErrors
 }
 
 export const loadSummary = async (bw, path) => {
@@ -113,7 +114,7 @@ export const loadSummary = async (bw, path) => {
     return players;
 };
 
-async function writeErrors(errors, summary) {
+async function writeErrors(bw, errors, summary) {
     let sheet = summary.wb.getWorksheet('Summary');
     sheet.eachRow((row) => {
         errors.forEach((error) => {
@@ -134,7 +135,24 @@ async function writeErrors(errors, summary) {
             }
         })
     });
-    await summary.wb.xlsx.writeFile(summary.path);
+    await summary.wb.xlsx.writeFile(summary.path).then(() => {
+        bw.webContents.send('notify', {
+            message: `File saved in ${path}`,
+            type: 'positive',
+            timeout: 5000,
+        });
+        shell.openExternal(path);
+    })
+    .catch((err) => {
+        if (err.code == 'EBUSY') {
+            return bw.webContents.send('notify', {
+                message:
+                    "Can't save file, Make sure that it is not OPEN in another program",
+                type: 'negative',
+                timeout: 0,
+            });
+        }
+    });
 
     return summary;
 }
