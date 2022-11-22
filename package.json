@@ -13,7 +13,7 @@
     "build": "quasar build -m electron",
     "build:debug": "quasar build -m electron -d",
     "build:release": "quasar build -m electron -P always",
-    "postinstall": "electron-rebuild"
+    "postinstall:win32": "electron-rebuild"
   },
   "dependencies": {
     "@quasar/extras": "^1.15.6",
