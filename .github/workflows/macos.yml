@@ -46,7 +46,7 @@ jobs:
 
       - name: Install and Configure Node Modules
         run: |
-          pnpm install
+          pnpm preinstall && pnpm install
       - name: Build the DMG
         run: pnpm build
         
