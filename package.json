@@ -14,8 +14,9 @@
     "build": "quasar build -m electron",
     "build:debug": "quasar build -m electron -d",
     "build:release": "quasar build -m electron -P always",
-    "postinstall": "electron-rebuild",
-    "preinstall": "node preinstall.js"
+    "preinstall": "node preinstall.js",
+    "postinstall": "electron-rebuild"
+
   },
   "dependencies": {
     "@quasar/extras": "^1.15.6",
