@@ -3,8 +3,8 @@
 A Quasar Project
 
 ### Build Dependencies
-[Node](https://nodejs.org/en/download/) (LTS Version recommended)
-[Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_BuildTools.exe) -> Desktop Development with C++
+- [Node](https://nodejs.org/en/download/) (LTS Version recommended)
+- [Visual Studio Build Tools](https://aka.ms/vs/17/release/vs_BuildTools.exe) -> Desktop Development with C++
 ##### Optional: **yarn/ pnpm thru npm** (recommended)
 ```bash
 npm install -g yarn #installing yarn
