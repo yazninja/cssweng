@@ -1,0 +1,65 @@
+name: "macOS build"
+
+on:
+  push:
+    branches: [ staging ]
+    paths-ignore:
+      - 'README.md'
+      - '.vscode'
+      - '.gitignore'
+
+jobs:
+  build-macos:
+    name: build-macos
+    runs-on: macos-11
+    permissions:
+      actions: read
+      contents: write
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [ 18 ]
+
+    steps:
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '12.4'
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 7
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          
+      - name: Setup Environment
+        run: brew install automake #libtool autoconf
+
+      - name: Install and Configure Node Modules
+        run: |
+          pnpm install
+      - name: Build the DMG
+        run: pnpm build
+        
+      - name: Upload macOS Latest
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_name: yazninja/cssweng
+
+          file: dist/latest-mac.yml
+          tag: v${{ env.RELEASE_VERSION }}
+
+      - name: Upload Files (DMG)
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: dist/*.dmg
+          tag: githubactiontest
