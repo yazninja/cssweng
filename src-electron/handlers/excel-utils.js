@@ -33,19 +33,19 @@ export const compileData = async (bw, mode, path, bettors, errors) => {
     };
     if (mode === 'edit') {
         workbook = ogWorkbook;
-        let summarysheet = workbook.getWorksheet('Jojo Personal');
-        if (summarysheet) {
-            bw.webContents.send('notify', {
-                message: 'Jojo Personal sheet found, overwriting',
-                color: 'warning',
-                timeout: 5000,
-            });
-            workbook.removeWorksheet(summarysheet.id);
-        }
+        workbook.eachSheet((sheet, id) => {
+            if (sheet.name.match(/jojo personal/gi))
+                workbook.removeWorksheet(id);
+        })
+        bw.webContents.send('notify', {
+            message: 'Overwriting existing Jojo Personal sheet(s)',
+            color: 'warning',
+            timeout: 5000,
+        });
     }
 
-    await initializeSummarySheet(workbook);
-    await appendSummaryData(ogWorkbook, workbook, JSON.parse(bettors), JSON.parse(errors));
+    await initializeSummarySheet(workbook, JSON.parse(bettors));
+    await appendSummaryData(ogWorkbook, workbook, mode, JSON.parse(bettors), JSON.parse(errors));
     if (mode === 'new') {
         dialog.showSaveDialog(bw, options).then(async ({ filePath }) => {
             await workbook.xlsx
@@ -201,7 +201,7 @@ async function replaceWithAliases(summary, aliases) {
     return summary
 }
 
-async function initializeSummarySheet(workbook) {
+async function initializeSummarySheet(workbook, bettors) {
     let summarySheet = workbook.addWorksheet('Jojo Personal', {
         views: [{ state: 'frozen', ySplit: 9 }],
     });
@@ -255,6 +255,38 @@ async function initializeSummarySheet(workbook) {
             };
         }
     });
+
+    // for vlookup
+    summarySheet.getCell('G1002').value = 'Tong'
+    summarySheet.getCell('H1002').value = 'Comm'
+    bettors.forEach((bettor, i) => {
+        summarySheet.getRow(1003 + i).values = [, , , , , , bettor.name, bettor.tong, bettor.comm];
+        summarySheet.getRow(1003 + i).eachCell((cell, i) => {
+            if (!!cell.value || cell.value == 0) {
+                cell.alignment = {
+                    vertical: 'middle',
+                    horizontal: 'center'
+                };
+                cell.numFmt = '0.00%';
+                if (i == 7)
+                    cell.numFmt = '0%';
+            }
+        })
+    })
+    summarySheet.getRow(1002).eachCell(cell => {
+        if (!!cell.value) {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '92D050' }
+            };
+            cell.font = { name: 'Arial', family: 2, size: 10, bold: true }
+            cell.alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            };
+        }
+    })
 
     return summarySheet;
 }
@@ -327,10 +359,8 @@ async function loadWeeklySummary(summarySheet) {
     return summary;
 }
 
-function initializeData(player, bet, mode) {
-    // mode = 0 : error checking mode
-    // mode > 0 : summary data initializing mode
-    if (mode == 0) {
+function initializeData(player, bet, mode, exportMode, index) {
+    if (mode == 'checkErrors') {
         let winLose = bet.result.includes('win') ? bet.amount : bet.amount * -1;
         let tong = bet.result.includes('win') ? winLose * player.tong : 0;
         let result = winLose - tong + bet.amount * player.comm;
@@ -342,24 +372,40 @@ function initializeData(player, bet, mode) {
         };
 
         return test;
-    } else if (mode > 0) {
-        let rowIndex = mode;
-
-        let rowData = [
-            bet.day,
-            player.name,
-            bet.team,
-            bet.result,
-            bet.amount,
-            { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})` },
-            { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)` },
-            { formula: `F${rowIndex}-G${rowIndex}` },
-            { formula: `E${rowIndex}*J${rowIndex}` },
-            player.comm,
-            { formula: `H${rowIndex}+I${rowIndex}` },
-        ];
-
-        return rowData;
+    } else if (mode == 'dataAppend') {
+        let rowIndex = index;
+        if (exportMode == 'new') {
+            let rowData = [
+                bet.day,
+                player.name,
+                bet.team,
+                bet.result,
+                bet.amount,
+                { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})`, result: undefined },
+                { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)`, result: undefined },
+                { formula: `F${rowIndex}-G${rowIndex}`, result: undefined },
+                { formula: `E${rowIndex}*J${rowIndex}`, result: undefined },
+                player.comm,
+                { formula: `H${rowIndex}+I${rowIndex}`, result: undefined },
+            ];
+            return rowData;
+        }
+        else if (exportMode == 'edit') {
+            let rowData = [
+                bet.day,
+                player.name,
+                bet.team,
+                bet.result,
+                bet.amount,
+                { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})`, result: undefined },
+                { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)`, result: undefined },
+                { formula: `F${rowIndex}-G${rowIndex}`, result: undefined },
+                { formula: `E${rowIndex}*J${rowIndex}`, result: undefined },
+                { formula: `IF(ISNA(VLOOKUP(B${rowIndex},$F$1002:$H$1020,3,FALSE)), 0,  VLOOKUP(B${rowIndex},$F$1002:$H$1020,3,FALSE))`, result: undefined },
+                { formula: `H${rowIndex}+I${rowIndex}`, result: undefined },
+            ];
+            return rowData;
+        }
     }
     return 'error in compiling data';
 }
@@ -376,7 +422,7 @@ export const checkErrors = async (bw, path, bettors) => {
         JSON.parse(bettors).forEach((player) => {
             player.bets.forEach((bet) => {
                 if (day == bet.day) {
-                    playerData.push(initializeData(player, bet, 0));
+                    playerData.push(initializeData(player, bet, 'checkErrors', 0, 0));
                 }
             });
         });
@@ -452,11 +498,14 @@ export const checkErrors = async (bw, path, bettors) => {
             color: 'warning',
         });
     }
-    console.log('ERRORS: ' + JSON.stringify(errorList));
+    console.log('ERRORS: ');
+    errorList.forEach(error => {
+        console.log(error);
+    })
     return errorList;
 };
 
-async function appendSummaryData(og, workbook, bettors, errors) {
+async function appendSummaryData(og, workbook, mode, bettors, errors) {
     let days = loadDays(og).map((day) => day.name.substring(0, 3));
     let rowIndex = 10;
     let sheet = workbook.getWorksheet('Jojo Personal');
@@ -468,8 +517,7 @@ async function appendSummaryData(og, workbook, bettors, errors) {
             player.bets.forEach((bet) => {
                 if (day == bet.day) {
                     // Initialize each row
-                    let rowData = initializeData(player, bet, rowIndex);
-
+                    let rowData = initializeData(player, bet, 'dataAppend', mode, rowIndex);
                     //console.log('ROW DATA', rowIndex, rowData);
                     sheet.getRow(rowIndex).values = rowData;
 
