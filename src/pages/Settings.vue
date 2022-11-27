@@ -2,9 +2,34 @@
   <q-page class="q-pa-md q-gutter-y-sm">
     <q-toolbar :class="darkMode && 'text-white'">
       <q-btn flat round icon="arrow_back_ios_new" to="/" />
-      <q-toolbar-title>Settings</q-toolbar-title>
+      <q-toolbar-title class="text-bold">SETTINGS</q-toolbar-title>
     </q-toolbar>
     <div class="flex column q-pa-md">
+      <div class="text-h6 alias-title" :class="darkMode && 'text-white'">
+        <div class="flex">Theme</div>
+          <q-btn-toggle
+            v-model="themeSource"
+            @update:model-value="setThemeMode(themeSource)"
+            toggle-color="primary"
+            :options="[
+              { label: 'Light', value: 'light' },
+              { label: 'Dark', value: 'dark' },
+              { label: 'System', value: 'system' }
+            ]"
+          />
+          <q-option-group style="font-size: 1rem; font-weight:normal"
+            v-model="themeSource"
+            type="radio"
+            :dark="darkMode"
+            @update:model-value="setThemeMode(themeSource)"
+            :options="[
+              { label: 'Light', value: 'light' },
+              { label: 'Dark', value: 'dark' },
+              { label: 'System', value: 'system' }
+            ]"
+          />
+      </div>
+      <q-separator :dark="darkMode" spaced="lg" />
       <div class="text-h6 alias-title" :class="darkMode && 'text-white'">
         <div class="flex">
           Custom Alias (for script 2)
@@ -25,7 +50,7 @@
             </template>
           </q-file>
         </div>
-        <q-separator :dark="darkMode" spaced="lg" />
+
       </div>
       <q-table
         v-if="store.getBettors() != []"
@@ -140,6 +165,7 @@ export default defineComponent({
       fileLoading: ref(false),
       release: ref(null),
       releaseAppVer: ref(null),
+      themeSource: ref('system'),
       window: window,
 
       getFilteredBettors() {
@@ -155,6 +181,10 @@ export default defineComponent({
         let bIndex = bettors.findIndex((b) => b.name == bettor);
         bettors[bIndex].alias = alias;
         store.setBettors(bettors);
+      },
+      async setThemeMode(mode) {
+        console.log(mode)
+        await this.window.ipcRenderer.invoke('setThemeMode', mode);
       },
       async onAliasFileInput() {
         console.log(this.aliasFile.path);
@@ -174,7 +204,10 @@ export default defineComponent({
     })
     await window.ipcRenderer
       .getThemeMode()
-      .then((res) => (this.darkMode = res));
+      .then((res) => {
+        this.darkMode = res.mode
+        this.themeSource = res.source
+      });
     window.ipcRenderer.receive(
       'theme-changed',
       async (arg) => (this.darkMode = arg)

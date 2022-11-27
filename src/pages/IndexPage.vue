@@ -204,7 +204,7 @@ export default defineComponent({
       }
   },
   async mounted() {
-      await window.ipcRenderer.getThemeMode().then((res) => this.darkMode = res);
+      await window.ipcRenderer.getThemeMode().then((res) => this.darkMode = res.mode);
       window.ipcRenderer.receive('theme-changed', async (arg) => this.darkMode = arg);
       window.ipcRenderer.invoke('isMica').then( async (arg) => this.isMica = arg);
       window.ipcRenderer.receive('notify', async (arg) => {
