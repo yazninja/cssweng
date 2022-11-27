@@ -31,6 +31,8 @@ function createWindow() {
       icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
       width: 1000,
       height: 600,
+      minWidth: 450,
+      minHeight: 600,
       useContentSize: true,
       effect: PARAMS.BACKGROUND.MICA,
       theme: VALUE.THEME.AUTO,
@@ -121,7 +123,13 @@ app.on('activate', () => {
 });
 
 ipcMain.handle('getThemeMode', async () => {
-  return nativeTheme.shouldUseDarkColors;
+  return { mode: nativeTheme.shouldUseDarkColors, source: nativeTheme.themeSource};
+});
+
+ipcMain.handle('setThemeMode', async (e, args) => {
+  console.log('setThemeMode', args);
+    nativeTheme.themeSource = args;
+    return nativeTheme.themeSource;
 });
 ipcMain.handle('isMica', async () => {
   return os.release().split('.')[2] >= 22000;

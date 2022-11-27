@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
         }
     },
     getThemeMode: async () => ipcRenderer.invoke('getThemeMode'),
+    setThemeMode: async (mode) => ipcRenderer.invoke('setThemeMode', mode),
     getAppVersion: async () => ipcRenderer.invoke('getAppVersion'),
     invoke: async (channel, data) => ipcRenderer.invoke(channel, data)
 })

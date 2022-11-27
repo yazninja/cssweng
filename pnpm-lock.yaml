@@ -9,15 +9,15 @@ specifiers:
   '@typescript-eslint/parser': ^5.44.0
   '@vue/devtools': ^6.4.5
   autoprefixer: ^10.4.13
-  electron: ^21.3.0
+  electron: ^21.3.1
   electron-builder: ^23.6.0
   eslint: ^8.28.0
   eslint-config-prettier: ^8.5.0
-  eslint-plugin-vue: ^9.7.0
+  eslint-plugin-vue: ^9.8.0
   exceljs: ^4.3.0
   mica-electron: ^1.1.6
-  pinia: ^2.0.25
-  prettier: ^2.7.1
+  pinia: ^2.0.26
+  prettier: ^2.8.0
   quasar: ^2.10.2
   typescript: ^4.9.3
   vue: ^3.2.45
@@ -27,25 +27,25 @@ dependencies:
   '@quasar/extras': 1.15.6
   exceljs: 4.3.0
   mica-electron: 1.1.6
-  pinia: 2.0.25_mgnvym7yiazkylwwogi5r767ue
+  pinia: 2.0.26_mgnvym7yiazkylwwogi5r767ue
   quasar: 2.10.2
   vue: 3.2.45
   vue-router: 4.1.6_vue@3.2.45
 
 devDependencies:
   '@electron/rebuild': 3.2.10
-  '@quasar/app-vite': 1.1.3_xdvubv2k6nhrvo5nc63jq257w4
+  '@quasar/app-vite': 1.1.3_ewyqqgnpigsm3sbsucpemeayk4
   '@types/node': 18.11.9
   '@typescript-eslint/eslint-plugin': 5.44.0_fnsv2sbzcckq65bwfk7a5xwslu
   '@typescript-eslint/parser': 5.44.0_hsf322ms6xhhd4b5ne6lb74y4a
   '@vue/devtools': 6.4.5
   autoprefixer: 10.4.13
-  electron: 21.3.0
+  electron: 21.3.1
   electron-builder: 23.6.0
   eslint: 8.28.0
   eslint-config-prettier: 8.5.0_eslint@8.28.0
-  eslint-plugin-vue: 9.7.0_eslint@8.28.0
-  prettier: 2.7.1
+  eslint-plugin-vue: 9.8.0_eslint@8.28.0
+  prettier: 2.8.0
   typescript: 4.9.3
 
 packages:
@@ -269,7 +269,7 @@ packages:
     resolution: {integrity: sha512-nWlGg+aMfQDhGYa5FtBhZwldeo2MtdjHdxmEQvhBXEnxgD5IhIYl0PHvex8SdwyN7qcSoMykMWdjyAX7ZxkpMw==}
     dev: true
 
-  /@quasar/app-vite/1.1.3_xdvubv2k6nhrvo5nc63jq257w4:
+  /@quasar/app-vite/1.1.3_ewyqqgnpigsm3sbsucpemeayk4:
     resolution: {integrity: sha512-YX6lVkjRFNDbYcORiMtNlDz3jlSf7ldF4zGZk8zaW/Q1CfjaLqpSqCmBP4eta6QXz7To0IdabROYKa55D6IDgA==}
     engines: {node: ^18 || ^16 || ^14.19, npm: '>= 6.14.12', yarn: '>= 1.17.3'}
     hasBin: true
@@ -307,7 +307,7 @@ packages:
       '@vitejs/plugin-vue': 2.3.4_vite@2.9.15+vue@3.2.45
       archiver: 5.3.1
       chokidar: 3.5.3
-      ci-info: 3.6.1
+      ci-info: 3.7.0
       compression: 1.7.4
       cross-spawn: 7.0.3
       dot-prop: 6.0.1
@@ -326,7 +326,7 @@ packages:
       minimist: 1.2.7
       open: 8.4.0
       ouch: 2.0.1
-      pinia: 2.0.25_mgnvym7yiazkylwwogi5r767ue
+      pinia: 2.0.26_mgnvym7yiazkylwwogi5r767ue
       quasar: 2.10.2
       register-service-worker: 1.7.2
       rollup-plugin-visualizer: 5.8.3
@@ -580,8 +580,8 @@ packages:
     resolution: {integrity: sha512-iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==}
     dev: true
 
-  /@types/yargs/17.0.13:
-    resolution: {integrity: sha512-9sWaruZk2JGxIQU+IhI1fhPYRcQ0UuTNuKuCW9bR5fp7qi2Llf7WDzNa17Cy7TKnh3cdxDOiyTu6gaLS0eDatg==}
+  /@types/yargs/17.0.14:
+    resolution: {integrity: sha512-9Pj7abXoW1RSTcZaL2Hk6G2XyLMlp5ECdVC/Zf2p/KBjC3srijLGgRAXOBjtFrJoIrvxdTKyKDA14bEcbxBaWw==}
     dependencies:
       '@types/yargs-parser': 21.0.0
     dev: true
@@ -775,11 +775,11 @@ packages:
     hasBin: true
     dependencies:
       cross-spawn: 7.0.3
-      electron: 21.3.0
+      electron: 21.3.1
       express: 4.18.2
       ip: 1.1.8
-      socket.io: 4.5.3_utf-8-validate@5.0.10
-      socket.io-client: 4.5.3_utf-8-validate@5.0.10
+      socket.io: 4.5.4_utf-8-validate@5.0.10
+      socket.io-client: 4.5.4_utf-8-validate@5.0.10
       utf-8-validate: 5.0.10
     transitivePeerDependencies:
       - bufferutil
@@ -1381,8 +1381,8 @@ packages:
     resolution: {integrity: sha512-1R5Fho+jBq0DDydt+/vHWj5KJNJCKdARKOCwZUen84I5BreWoLqRLANH1U87eJy1tiASPtMnGqJJq0ZsLoRPOw==}
     dev: true
 
-  /ci-info/3.6.1:
-    resolution: {integrity: sha512-up5ggbaDqOqJ4UqLKZ2naVkyqSJQgJi5lwD6b6mM748ysrghDBX0bx/qJTUHzw7zu6Mq4gycviSF5hJnwceD8w==}
+  /ci-info/3.7.0:
+    resolution: {integrity: sha512-2CpRNYmImPx+RXKLq6jko/L07phmS9I02TyqkcNU20GCF/GgaWvc58hPtjxDX8lPpkdwc9sNh72V9k00S7ezog==}
     engines: {node: '>=8'}
     dev: true
 
@@ -1814,7 +1814,7 @@ packages:
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
-      '@types/yargs': 17.0.13
+      '@types/yargs': 17.0.14
       app-builder-lib: 23.6.0
       builder-util: 23.6.0
       builder-util-runtime: 9.1.1
@@ -1824,7 +1824,7 @@ packages:
       is-ci: 3.0.1
       lazy-val: 1.0.5
       read-config-file: 6.2.0
-      simple-update-notifier: 1.0.7
+      simple-update-notifier: 1.1.0
       yargs: 17.6.2
     transitivePeerDependencies:
       - supports-color
@@ -1889,8 +1889,8 @@ packages:
     resolution: {integrity: sha512-M8WEXFuKXMYMVr45fo8mq0wUrrJHheiKZf6BArTKk9ZBYCKJEOU5H8cdWgDT+qCVZf7Na4lVUaZsA+h6uA9+PA==}
     dev: true
 
-  /electron/21.3.0:
-    resolution: {integrity: sha512-MGRpshN8fBcx4IRuBABIsGDv0tB/MclIFsyFHFFXsBCUc+vIXaE/E6vuWaniGIFSz5WyeuapfTH5IeRb+7yIfw==}
+  /electron/21.3.1:
+    resolution: {integrity: sha512-Ik/I9oFHA1h32JRtRm6GMgYdUctFpF/tPnHyATg4r3LXBTUT6habGh3GxSdmmTa5JgtA7uJUEm8EjjZItk7T3g==}
     engines: {node: '>= 10.17.0'}
     hasBin: true
     requiresBuild: true
@@ -2211,8 +2211,8 @@ packages:
       eslint: 8.28.0
     dev: true
 
-  /eslint-plugin-vue/9.7.0_eslint@8.28.0:
-    resolution: {integrity: sha512-DrOO3WZCZEwcLsnd3ohFwqCoipGRSTKTBTnLwdhqAbYZtzWl0o7D+D8ZhlmiZvABKTEl8AFsqH1GHGdybyoQmw==}
+  /eslint-plugin-vue/9.8.0_eslint@8.28.0:
+    resolution: {integrity: sha512-E/AXwcTzunyzM83C2QqDHxepMzvI2y6x+mmeYHbVDQlKFqmKYvRrhaVixEeeG27uI44p9oKDFiyCRw4XxgtfHA==}
     engines: {node: ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: ^6.2.0 || ^7.0.0 || ^8.0.0
@@ -3010,7 +3010,7 @@ packages:
     resolution: {integrity: sha512-ZYvCgrefwqoQ6yTyYUbQu64HsITZ3NfKX1lzaEYdkTDcfKzzCI/wthRRYKkdjHKFVgNiXKAKm65Zo1pk2as/QQ==}
     hasBin: true
     dependencies:
-      ci-info: 3.6.1
+      ci-info: 3.7.0
     dev: true
 
   /is-core-module/2.11.0:
@@ -3385,7 +3385,7 @@ packages:
     resolution: {integrity: sha512-ndMTUUtZuKkrg274gR6187oVEWtKP7tfrljvRMlvSjj6MIMc+tnDnaKU9N6ruc3JrcbhM0UH/hC1aD0QsuuiQw==}
     requiresBuild: true
     dependencies:
-      electron: 21.3.0
+      electron: 21.3.1
       electron-rebuild: 3.2.9
     transitivePeerDependencies:
       - bluebird
@@ -3825,8 +3825,8 @@ packages:
     engines: {node: '>=4'}
     optional: true
 
-  /pinia/2.0.25_mgnvym7yiazkylwwogi5r767ue:
-    resolution: {integrity: sha512-3reAkjJ6bW2D5hZKRMS0c9rUbHVlsVyZd037xO0PJr2AuF/09RRSBnFLlJgmHF4Jx6dEoW/jZBOHTushY7IMlw==}
+  /pinia/2.0.26_mgnvym7yiazkylwwogi5r767ue:
+    resolution: {integrity: sha512-tSxZNUcMGxQOvKZRjPKXxd2+/2NZhRF/CoYVE/+K6uE/Z3v1Oi4fcQFpxu5nMB1dCchjXUZ+lz0tBxV5ntwmQQ==}
     peerDependencies:
       '@vue/composition-api': ^1.4.0
       typescript: '>=4.4.4'
@@ -3879,8 +3879,8 @@ packages:
     resolution: {integrity: sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA==}
     engines: {node: '>=4'}
 
-  /prettier/2.7.1:
-    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
+  /prettier/2.8.0:
+    resolution: {integrity: sha512-9Lmg8hTFZKG0Asr/kW9Bp8tJjRVluO8EJQVfY2T7FMw9T5jy4I/Uvx0Rca/XWf50QQ1/SS48+6IJWnrb+2yemA==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: true
@@ -4286,8 +4286,8 @@ packages:
   /signal-exit/3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
 
-  /simple-update-notifier/1.0.7:
-    resolution: {integrity: sha512-BBKgR84BJQJm6WjWFMHgLVuo61FBDSj1z/xSFUIozqO6wO7ii0JxCqlIud7Enr/+LhlbNI0whErq96P2qHNWew==}
+  /simple-update-notifier/1.1.0:
+    resolution: {integrity: sha512-VpsrsJSUcJEseSbMHkrsrAVSdvVS5I96Qo1QAQ4FxQ9wXFcB+pjj7FB7/us9+GcgfW4ziHtYMc1J0PLczb55mg==}
     engines: {node: '>=8.10.0'}
     dependencies:
       semver: 7.0.0
@@ -4326,8 +4326,8 @@ packages:
     resolution: {integrity: sha512-W4N+o69rkMEGVuk2D/cvca3uYsvGlMwsySWV447y99gUPghxq42BxqLNMndb+a1mm/5/7NeXVQS7RLa2XyXvYg==}
     dev: true
 
-  /socket.io-client/4.5.3_utf-8-validate@5.0.10:
-    resolution: {integrity: sha512-I/hqDYpQ6JKwtJOf5ikM+Qz+YujZPMEl6qBLhxiP0nX+TfXKhW4KZZG8lamrD6Y5ngjmYHreESVasVCgi5Kl3A==}
+  /socket.io-client/4.5.4_utf-8-validate@5.0.10:
+    resolution: {integrity: sha512-ZpKteoA06RzkD32IbqILZ+Cnst4xewU7ZYK12aS1mzHftFFjpoMz69IuhP/nL25pJfao/amoPI527KnuhFm01g==}
     engines: {node: '>=10.0.0'}
     dependencies:
       '@socket.io/component-emitter': 3.1.0
@@ -4350,8 +4350,8 @@ packages:
       - supports-color
     dev: true
 
-  /socket.io/4.5.3_utf-8-validate@5.0.10:
-    resolution: {integrity: sha512-zdpnnKU+H6mOp7nYRXH4GNv1ux6HL6+lHL8g7Ds7Lj8CkdK1jJK/dlwsKDculbyOHifcJ0Pr/yeXnZQ5GeFrcg==}
+  /socket.io/4.5.4_utf-8-validate@5.0.10:
+    resolution: {integrity: sha512-m3GC94iK9MfIEeIBfbhJs5BqFibMtkRk8ZpKwG2QwxV0m/eEhPIV4ara6XCF1LWNAus7z58RodiZlAH71U3EhQ==}
     engines: {node: '>=10.0.0'}
     dependencies:
       accepts: 1.3.8
