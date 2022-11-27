@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md q-gutter-y-sm">
+  <q-page class="q-pa-md q-gutter-y-sm" :class="!isMica && darkMode && 'dark'">
     <q-toolbar :class="darkMode && 'text-white'">
       <q-btn flat round icon="arrow_back_ios_new" to="/" />
       <q-toolbar-title class="text-bold">SETTINGS</q-toolbar-title>
