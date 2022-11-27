@@ -36,6 +36,7 @@ export const compileData = async (bw, mode, path, bettors, errors) => {
         workbook.eachSheet((sheet, id) => {
             if (sheet.name.match(/jojo personal/gi))
                 workbook.removeWorksheet(id);
+            //console.log(sheet.name, sheet.id)
         })
         bw.webContents.send('notify', {
             message: 'Overwriting existing Jojo Personal sheet(s)',
@@ -45,7 +46,7 @@ export const compileData = async (bw, mode, path, bettors, errors) => {
     }
 
     await initializeSummarySheet(workbook, JSON.parse(bettors));
-    await appendSummaryData(ogWorkbook, workbook, mode, JSON.parse(bettors), JSON.parse(errors));
+    await appendSummaryData(ogWorkbook, workbook, JSON.parse(bettors), JSON.parse(errors));
     if (mode === 'new') {
         dialog.showSaveDialog(bw, options).then(async ({ filePath }) => {
             await workbook.xlsx
@@ -359,7 +360,7 @@ async function loadWeeklySummary(summarySheet) {
     return summary;
 }
 
-function initializeData(player, bet, mode, exportMode, index) {
+function initializeData(player, bet, mode, index) {
     if (mode == 'checkErrors') {
         let winLose = bet.result.includes('win') ? bet.amount : bet.amount * -1;
         let tong = bet.result.includes('win') ? winLose * player.tong : 0;
@@ -370,42 +371,24 @@ function initializeData(player, bet, mode, exportMode, index) {
             winLose: winLose,
             subtotal: result,
         };
-
         return test;
-    } else if (mode == 'dataAppend') {
+    }
+    else if (mode == 'dataAppend') {
         let rowIndex = index;
-        if (exportMode == 'new') {
-            let rowData = [
-                bet.day,
-                player.name,
-                bet.team,
-                bet.result,
-                bet.amount,
-                { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})`, result: undefined },
-                { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)`, result: undefined },
-                { formula: `F${rowIndex}-G${rowIndex}`, result: undefined },
-                { formula: `E${rowIndex}*J${rowIndex}`, result: undefined },
-                player.comm,
-                { formula: `H${rowIndex}+I${rowIndex}`, result: undefined },
-            ];
-            return rowData;
-        }
-        else if (exportMode == 'edit') {
-            let rowData = [
-                bet.day,
-                player.name,
-                bet.team,
-                bet.result,
-                bet.amount,
-                { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})`, result: undefined },
-                { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)`, result: undefined },
-                { formula: `F${rowIndex}-G${rowIndex}`, result: undefined },
-                { formula: `E${rowIndex}*J${rowIndex}`, result: undefined },
-                { formula: `IF(ISNA(VLOOKUP(B${rowIndex},$F$1002:$H$1020,3,FALSE)), 0,  VLOOKUP(B${rowIndex},$F$1002:$H$1020,3,FALSE))`, result: undefined },
-                { formula: `H${rowIndex}+I${rowIndex}`, result: undefined },
-            ];
-            return rowData;
-        }
+        let rowData = [
+            bet.day,
+            player.name,
+            bet.team,
+            bet.result,
+            bet.amount,
+            { formula: `IF(D${rowIndex}="win",E${rowIndex},-E${rowIndex})`, result: undefined },
+            { formula: `IF(F${rowIndex}>0,E${rowIndex}*${player.tong}, 0)`, result: undefined },
+            { formula: `F${rowIndex}-G${rowIndex}`, result: undefined },
+            { formula: `E${rowIndex}*J${rowIndex}`, result: undefined },
+            { formula: `IF(ISNA(VLOOKUP(B${rowIndex},$F$1002:$H$1020,3,FALSE)), 0,  VLOOKUP(B${rowIndex},$F$1002:$H$1020,3,FALSE))`, result: undefined },
+            { formula: `H${rowIndex}+I${rowIndex}`, result: undefined },
+        ];
+        return rowData;
     }
     return 'error in compiling data';
 }
@@ -422,7 +405,7 @@ export const checkErrors = async (bw, path, bettors) => {
         JSON.parse(bettors).forEach((player) => {
             player.bets.forEach((bet) => {
                 if (day == bet.day) {
-                    playerData.push(initializeData(player, bet, 'checkErrors', 0, 0));
+                    playerData.push(initializeData(player, bet, 'checkErrors', 0));
                 }
             });
         });
@@ -505,7 +488,7 @@ export const checkErrors = async (bw, path, bettors) => {
     return errorList;
 };
 
-async function appendSummaryData(og, workbook, mode, bettors, errors) {
+async function appendSummaryData(og, workbook, bettors, errors) {
     let days = loadDays(og).map((day) => day.name.substring(0, 3));
     let rowIndex = 10;
     let sheet = workbook.getWorksheet('Jojo Personal');
@@ -517,7 +500,7 @@ async function appendSummaryData(og, workbook, mode, bettors, errors) {
             player.bets.forEach((bet) => {
                 if (day == bet.day) {
                     // Initialize each row
-                    let rowData = initializeData(player, bet, 'dataAppend', mode, rowIndex);
+                    let rowData = initializeData(player, bet, 'dataAppend', rowIndex);
                     //console.log('ROW DATA', rowIndex, rowData);
                     sheet.getRow(rowIndex).values = rowData;
 
