@@ -16,11 +16,12 @@
     :rows="players[currPlayer?.value].bets"
     :title="titleFn(currPlayer)"
     :rows-per-page-options="[]"
-    :dark="dark"
-    :pagination="{ rowsPerPage: 20 }"
-    separator="vertical"
     row-key="day"
+    :dark="dark"
     dense
+    separator="vertical"
+    class="text-center q-table"
+    :pagination="{ rowsPerPage: 20 }"
     >
     <template v-slot:top>
       <div class="tableTitle text-left flex column text-weight-bold">
@@ -40,21 +41,8 @@
       label="Bettors"
       class="tableSelect"
     />
-
+  
     </template>
-    <template v-slot:header="props">
-      <q-tr :props="props">
-        <q-th
-        v-for="col in props.cols"
-        :key="col.name"
-        :props="props"
-        class="text-justify"
-        >
-          {{col.label}}
-        </q-th>
-      </q-tr>
-    </template>
-
     <template v-slot:body="props">
       <q-tr :props="props">
         <q-td key="day" :props="props" >
@@ -82,21 +70,6 @@
             />
           </q-popup-edit>
         </q-td>
-
-        <q-td key="amount" :props="props" class="text-justify">
-          {{ formatter.format(props.row.amount) }}
-          <q-popup-edit v-model.number="props.row.amount" auto-save v-slot="scope">
-            <q-input type="number"
-              v-model="scope.value"
-              dense
-              autofocus
-              counter
-              label="Amount"
-              @keyup.enter="scope.set"
-            />
-          </q-popup-edit>
-        </q-td>
-
         <q-td key="result" :props="props">
           {{ props.row.result }}
           <q-popup-edit v-model="props.row.result" auto-save v-slot="scope">
@@ -108,6 +81,19 @@
               options-dense
               label="Result"
               :options="['win','lose']"
+              @keyup.enter="scope.set"
+            />
+          </q-popup-edit>
+        </q-td>
+        <q-td key="amount" :props="props">
+          {{ formatter.format(props.row.amount) }}
+          <q-popup-edit v-model.number="props.row.amount" auto-save v-slot="scope">
+            <q-input type="number"
+              v-model="scope.value"
+              dense
+              autofocus
+              counter
+              label="Amount"
               @keyup.enter="scope.set"
             />
           </q-popup-edit>

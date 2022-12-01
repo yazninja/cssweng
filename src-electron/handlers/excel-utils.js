@@ -11,11 +11,8 @@ export const loadExcelFile = async (bw, path, mode) => {
     }
     else if (mode == 'loadBettors') {
         let bettors = await loadJojoBettors(bw, workbook, playWorksheet);
-        if (bettors) {
-            await appendBets(bettors, workbook);
-            //console.log(JSON.stringify(bettors))
-            return bettors;
-        }
+        await appendBets(bettors, workbook);
+        return bettors;
     }
     else if (mode == 'loadSummary') {
         let players = await loadSummary(bw, workbook, summarySheet);
@@ -64,7 +61,13 @@ export const compileData = async (bw, mode, path, bettors, errors) => {
                 })
                 .catch((err) => {
                     if (err.code == 'EBUSY') {
-                        return errorNotif(bw, 'negative', "Can't save file, Make sure that it is not OPEN in another program")
+                        return bw.webContents.send('notify', {
+                            message:
+                                "Can't save file, Make sure that it is not OPEN in another program",
+                            type: 'negative',
+                            timeout: 0,
+                            closeBtn,
+                        });
                     }
                 });
         });
@@ -81,7 +84,13 @@ export const compileData = async (bw, mode, path, bettors, errors) => {
             })
             .catch((err) => {
                 if (err.code == 'EBUSY') {
-                    return errorNotif(bw, 'negative', "Can't save file, Make sure that it is not OPEN in another program")
+                    return bw.webContents.send('notify', {
+                        message:
+                            "Can't save file, Make sure that it is not OPEN in another program",
+                        type: 'negative',
+                        timeout: 0,
+                        closeBtn,
+                    });
                 }
             });
     }
@@ -130,7 +139,12 @@ async function writeErrors(bw, errors, summary) {
     })
         .catch((err) => {
             if (err.code == 'EBUSY') {
-                return errorNotif(bw, 'negative', "Can't save file, Make sure that it is not OPEN in another program")
+                return bw.webContents.send('notify', {
+                    message:
+                        "Can't save file, Make sure that it is not OPEN in another program",
+                    type: 'negative',
+                    timeout: 0,
+                });
             }
         });
 
@@ -540,21 +554,16 @@ async function appendSummaryData(og, workbook, bettors, errors) {
 async function loadJojoBettors(bw, workbook, playWorksheet) {
     let players = [];
     if (!playWorksheet) { return await errorNotif(bw, 'negative', 'Jojo Bettors sheet not found') }
-    else {
-        playWorksheet.eachRow((row, i) => {
-            if (i > 0 && !!row.getCell(1).value) {
-                players.push({
-                    name: row.getCell(1).value,
-                    tong: row.getCell(2).value,
-                    comm: row.getCell(3).value,
-                    bets: []
-                })
-            }
-            else return;
-        })
-    }
-    if (players.length < 1) { return await errorNotif(bw, 'negative', 'No bettors found in Jojo Bettors sheet') }
-    else return players;
+    playWorksheet.eachRow((row) => {
+        if (row._cells[0].value === null) return;
+        players.push({
+            name: row._cells[0].value,
+            tong: row._cells[1].value,
+            comm: row._cells[2].value,
+            bets: [],
+        });
+    });
+    return players;
 }
 
 async function loadSummary(bw, workbook, summarySheet) {
