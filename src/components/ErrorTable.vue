@@ -6,6 +6,7 @@
   :title="Errors"
   :rows-per-page-options="[]"
   :rows="errors"
+  separator="vertical"
   row-key="name"
   dense
   >
@@ -50,6 +51,14 @@
 <style scoped>
   .tableTitle {
     font-size: 1.2rem;
+  }
+  .q-tr:nth-child(odd) {
+  background-color: #090909;
+  }
+  @media (prefers-color-scheme: light) {
+  .q-tr:nth-child(odd) {
+    background-color: #e1e1e1;
+  }
   }
 </style>
 
