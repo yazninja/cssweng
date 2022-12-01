@@ -165,10 +165,12 @@ export default defineComponent({
                 this.busy = true;
                 this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path, JSON.stringify(bettors)]});
                 if (this.errors.length > 0) {
-                  this.errors.forEach(error => {
+                  /*this.errors.forEach(error => {
                     console.log(error)
                     $q.notify({ message: `Error for ${error.name} - ${Object.keys(error).filter(e => (e != "name" && e != "net")).toString()}`, color: 'warning', timeout: 10000 })
-                  });
+                  });*/
+                  console.log(this.errors)
+                  $q.notify({ message: 'Errors detected.', color: 'warning'})
                 }
                 else {
                   $q.notify({ message: 'No errors found!', type: 'positive', timeout: 2000 })
