@@ -1,5 +1,5 @@
 import { app, nativeTheme, BrowserWindow, ipcMain } from 'electron'
-import { VALUE, PARAMS, MicaBrowserWindow } from 'mica-electron'
+import { VALUE, PARAMS, MicaBrowserWindow } from 'mica-electron' // remove if building for non Windows OS
 import path from 'path'
 import os from 'os'
 import { loadExcelFile, compileData, crossCheck, checkErrors } from './handlers/excel-utils.js'

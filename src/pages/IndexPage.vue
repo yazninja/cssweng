@@ -198,14 +198,19 @@ export default defineComponent({
             })
           },
           async handleExport(e) {
+            this.busy = true
+              $q.loading.show({
+                spinner: QSpinnerCube,
+                spinnerColor: 'primary',
+                message: "Preparing your Excel File for Exporting.",});
               if(e == 'Edit Current File') {
-                    await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['edit', this.file.value.path, JSON.stringify(this.players.value), JSON.stringify(this.errors.value)]});
-                    this.busy.value = false;
+                    await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['edit', this.file.value.path, JSON.stringify(this.players), JSON.stringify(this.errors)]});
+                    this.busy = false;
                     $q.loading.hide();
               }
               else if(e == 'New File') {
-                  await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['new', this.file.value.path, JSON.stringify(this.players.value), JSON.stringify(this.errors.value)]});
-                  this.busy.value = false;
+                  await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['new', this.file.value.path, JSON.stringify(this.players), JSON.stringify(this.errors)]});
+                  this.busy = false;
                   $q.loading.hide();
               }
           },
