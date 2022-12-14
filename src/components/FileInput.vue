@@ -34,16 +34,16 @@
         :counter-label="counterLabelFn"
         :error="error"
         accept=".xlsx"
-        @update:model-value="changeFile()"
-        @clear="clearFile()"
+        @update:model-value="changeFile(1)"
+        @clear="clearFile(1)"
       >
         <template v-slot:prepend>
           <q-icon name="mdi-microsoft-excel" />
         </template>
       </q-file>
       <q-file
-        v-if="(!busy && file2Ready)"
-        class="file-input file-input2"
+        v-if="(!busy && file2Ready && this.file)"
+        class="file-input2"
         v-model="file2"
         :label="placeholder2"
         counter
@@ -53,8 +53,8 @@
         :counter-label="counterLabelFn"
         :error="error"
         accept=".xlsx"
-        @update:model-value="changeFile2()"
-        @clear="clearFile()"
+        @update:model-value="changeFile(2)"
+        @clear="clearFile(2)"
       >
         <template v-slot:prepend>
           <q-icon name="mdi-microsoft-excel" />
@@ -75,7 +75,7 @@
         <q-file
           class="file-input upload"
           v-model="file"
-          @update:model-value="changeFile()"
+          @update:model-value="changeFile(1)"
         >
         </q-file>
       </div>
@@ -180,7 +180,7 @@
 }
 </style>
 <script>
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, watch} from 'vue';
 import { useQuasar } from 'quasar';
 
 export default defineComponent({
@@ -235,16 +235,18 @@ export default defineComponent({
       counterLabelFn({ totalSize, filesNumber }) {
         return filesNumber < 1 ? '' : totalSize;
       },
-      changeFile() {
-        this.$emit('changeFile', this.file);
-        this.fileMode = 'details';
+      changeFile(num) {
+        if (num == 1) {
+          this.$emit('changeFile', this.file);
+          this.fileMode = 'details';
+        }
+        else if (num == 2) {
+          this.$emit('changeFile', this.file2);
+        }
       },
-      changeFile2() {
-        this.$emit('changeFile2', this.file2);
-      },
-      clearFile() {
-        this.$emit('clearFile');
-      },
+      clearFile(num) {
+        this.$emit('clearFile', num);
+      }
     };
   },
   async mounted() {

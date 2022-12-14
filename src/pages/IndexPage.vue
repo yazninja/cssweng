@@ -11,8 +11,7 @@
         :busy="busy"
         :error="showError"
         @changeFile="parseXlsx($event)"
-        @changeFile2="parseXlsx($event)"
-        @clearFile="clearVariables()"
+        @clearFile="clearFile($event)"
         >
         </FileInput>
 
@@ -21,11 +20,16 @@
             <span class="flex flex-center text-warning text-center q-pl-lg q-pr-lg"> Note: Using Quick Edit automatically results in data mismatch. Use at own risk!</span>
             <div v-if="true" class="flex flex-center" style="gap: 10px">
               <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
-              <ActionButton color="secondary" label="Check For Errors" :disable="false" @click="handleButtonClick($event)"/>
+              <div v-if="!this.file2.value">
+              <ActionButton color="secondary" label="Check For Errors" :disable="true" @click="handleButtonClick($event)"/>
+              </div>
+              <div v-else>
+                <ActionButton color="secondary" label="Check For Errors" :disable="false" @click="handleButtonClick($event)"/>
+              </div>
           </div>
         </div>
 
-        <div v-if="errors.length > 0" class="actionDiv q-gutter-sm">
+        <div v-if="errors.length > 0" class="actionDiv q-gutter-sm q-pa-md">
             <ErrorTable :dark="$q.dark.isActive" :errors="errors.value"></ErrorTable>
             <div class="flex flex-center" style="gap: 10px">
                 <ActionButton color="primary" label="Export With Errors" @click="handleButtonClick($event)"/>
@@ -74,7 +78,7 @@ export default defineComponent({
 
   setup() {
       const $q = useQuasar()
-      console.log("BETTORS ON STARTUP", store.getBettors())
+      //console.log("BETTORS ON STARTUP", store.getBettors())
 
       watch(() => $q.dark.isActive, val => {
           console.log(val ? 'On dark mode' : 'On light mode')
@@ -93,8 +97,8 @@ export default defineComponent({
           handleError() {
               computed(() => this.showError.value = true);
               computed(() => this.busy.value = false);
-              computed(() => this.file.value = null);
-              computed(() => this.file.value2 = null);
+              this.file.value = null
+              this.file2.value = null
               $q.loading.hide();
           },
           handleWarning() {
@@ -103,16 +107,37 @@ export default defineComponent({
               computed(() => this.busy.value = false)
               $q.loading.hide();
           },
+          clearFile(num) {
+            if (num == 1) {
+              this.file.value = null
+              this.errors.value = null;
+              this.errors.length = 0;
+              console.log("CLEARING FILE 1:", this.file)
+            }
+            else if (num == 2) {
+              this.file2.value = null;
+              this.errors_s2.value = null;
+              this.errors_s2.length = 0;
+              console.log("CLEARING FILE 2:", this.file2)
+            }
+          },
           clearVariables() {
-            $q.loading.hide();
-            computed(() => this.file.value = null);
-            computed(() => this.file.value2 = null);
-            computed(() => this.players.value = []);
+            console.log("Clearing Variables");
+            this.file.value = null;
+            this.file2.value = null;
+            this.players.value = null;
+            this.players.length = 0
+            this.bettorsTable.value = null;
+            this.errorChecking = false
+            this.errors.value = []
+            this.errors.length = 0
+            this.errors_s2.value = []
+            this.errors_s2.length = 0
             computed(() => this.busy.value = false);
-            computed(() => this.bettorsTable.value = null);
             computed(() => this.showError.value = false);
-            computed(() => this.errorChecking.value = false);
-            computed(() => this.errors.value = []);
+            $q.loading.hide();
+            console.log(this.file, this.file2)
+            console.log("Clearing Finished")
             if(notif) {
               notif()
             }
@@ -122,15 +147,28 @@ export default defineComponent({
             computed(() => this.busy.value = false)
             computed(() => this.showError.value = false);
           },
-          async parseXlsx(f) {
+          async parseXlsx(f, num) {
+            if (!f) return
+            console.log(num)
+            if (this.file2.value && !this.file.value) {
+              console.log("Clearing All");
+              return this.clearVariables();
+            }
+
             if (!this.file.value) {
               this.file.value = f;
               console.log("FILE 1:", this.file)
+              let check_error = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']})
+              if (!check_error) this.file.value = null;
             }
-            else {
+            else if (!this.file2.value && this.file.value) {
               this.file2.value = f
               console.log("FILE 2:", this.file2)
+              let check_error = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file2.value.path, 'Check File 2']})
+              console.log("F2 check:", check_error)
             }
+
+
             computed(() => this.busy.value = true)
 
             $q.loading.show({
@@ -139,14 +177,7 @@ export default defineComponent({
               message: "Parsing the excel File.",
             });
 
-            if (!f) return this.clearVariables();
-
-            if (f[0]) {
-              console.log("Test")
-              computed(() => this.file.value = f[0]);
-            }
-
-            if (!this.players.value) {
+            if (!this.players.value && this.file.value) {
               computed(() => this.players.value = [])
               this.players.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']});
               if (!this.players.value || this.players.value.length == 0) {
@@ -158,8 +189,7 @@ export default defineComponent({
               console.log("PLAYERS:", this.players);
             }
 
-
-            if (!this.bettorsTable.value) {
+            if (!this.bettorsTable.value && this.file.value) {
               computed(() => this.bettorsTable.value = {})
               this.bettorsTable.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadSummary']});
               if (this.bettorsTable.value)
@@ -196,7 +226,7 @@ export default defineComponent({
                 else
                   notif = await this.exportFile()
               }
-              if (e == 'Export With Errors') {
+              else if (e == 'Export With Errors') {
                 notif = await this.exportFile()
               }
               else if (e == 'Cancel') {

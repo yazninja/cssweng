@@ -6,7 +6,13 @@ export const loadExcelFile = async (bw, path, mode) => {
     let workbook = await convertToWorkbook(path);
     let playWorksheet = workbook.getWorksheet('Jojo Bettors');
     let summarySheet = workbook.getWorksheet('Summary');
-    if (!playWorksheet && !summarySheet) {
+    if (mode == 'Check File 2') {
+        if (!summarySheet) {
+            await errorNotif(bw, 'negative', 'Cross-reference excel file has no Summary sheet.');
+            return 0;
+        }
+    }
+    else if (!playWorksheet && !summarySheet) {
         return await errorNotif(bw, 'negative', 'Jojo Bettors and Summary sheets not found')
     }
     else if (mode == 'loadBettors') {
