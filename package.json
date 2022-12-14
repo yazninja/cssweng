@@ -1,6 +1,6 @@
 {
   "name": "cssweng3",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Quasar Project",
   "productName": "Sports Betting Data Compiler",
   "author": "yazninja <yazlesean@gmail.com>",
@@ -18,10 +18,10 @@
     "postinstall": "electron-rebuild"
   },
   "dependencies": {
-    "@quasar/extras": "^1.15.6",
+    "@quasar/extras": "^1.15.8",
     "exceljs": "^4.3.0",
-    "mica-electron": "^1.1.6",
-    "pinia": "^2.0.26",
+    "mica-electron": "^1.1.7",
+    "pinia": "^2.0.28",
     "quasar": "^2.10.2",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
@@ -29,18 +29,18 @@
   "devDependencies": {
     "@electron/rebuild": "^3.2.10",
     "@quasar/app-vite": "^1.1.3",
-    "@types/node": "^18.11.9",
-    "@typescript-eslint/eslint-plugin": "^5.44.0",
-    "@typescript-eslint/parser": "^5.44.0",
+    "@types/node": "^18.11.13",
+    "@typescript-eslint/eslint-plugin": "^5.46.0",
+    "@typescript-eslint/parser": "^5.46.0",
     "@vue/devtools": "^6.4.5",
     "autoprefixer": "^10.4.13",
-    "electron": "^21.3.1",
+    "electron": "^22.0.0",
     "electron-builder": "^23.6.0",
-    "eslint": "^8.28.0",
+    "eslint": "^8.29.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-vue": "^9.8.0",
-    "prettier": "^2.8.0",
-    "typescript": "^4.9.3"
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
   },
   "engines": {
     "node": "^19 || ^18 || ^16 || ^14.19",

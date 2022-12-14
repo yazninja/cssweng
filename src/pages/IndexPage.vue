@@ -1,27 +1,20 @@
 <template>
-    <q-page class="flex flex-center column" :class="!isMica && darkMode && 'dark'">
-        <q-btn icon="o_settings" to="/settings" class="settings-icon" flat round :text-color="darkMode ? 'white' : 'black' " size="md" style="font-weight: 300;"/>
-        <FileInput placeholder="Input Excel File" :dark="darkMode" :busy="busy" :error="showError" @changeFile="parseXlsx($event)" @clearFile="clearVariables()"></FileInput>
+    <q-page class="flex flex-center column" :class="!isMica || $q.dark.isActive && 'dark'">
 
-        <div v-if="file && (!players || busy)">
-            <q-spinner-cube color="green" size="2em" />
-        </div>
+        <q-btn icon="o_settings" to="/settings" class="settings-icon" flat round :dark="$q.dark.isActive ? 'white' : 'black' " size="md" style="font-weight: 300;"/>
+        <FileInput placeholder="Input Excel File" placeholder2="Cross-refrence Excel File (weekly)" :file2Ready="players.length > 0" :dark="$q.dark.isActive" :busy="busy" :error="showError" @changeFile="parseXlsx($event)" @clearFile="clearVariables()"></FileInput>
 
-        <div v-if="players && !busy && !errorChecking" class="actionDiv q-gutter-sm">
-            <QuickEdit :dark="darkMode" :players="players"></QuickEdit>
-            <span class="flex flex-center text-warning"> Note: Using Quick Edit automatically results in data mismatch. Use at own risk!</span>
-            <div v-if="players && bettorsTable" class="flex flex-center" style="gap: 10px">
-                <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
-                <ActionButton color="secondary" label="Check For Errors" @click="handleButtonClick($event)"/>
-            </div>
-            <!--TODO: gray out check for errors button instead-->
-            <div v-else-if="!bettorsTable" class="flex flex-center">
-                <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
-            </div>
+        <div v-if="(players.length > 0 && !busy && !errorChecking)" class="actionDiv q-gutter-sm q-pa-md">
+            <QuickEdit :dark="$q.dark.isActive" :players="players"></QuickEdit>
+            <span class="flex flex-center text-warning text-center q-pl-lg q-pr-lg"> Note: Using Quick Edit automatically results in data mismatch. Use at own risk!</span>
+            <div v-if="true" class="flex flex-center" style="gap: 10px">
+              <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
+              <ActionButton color="secondary" label="Check For Errors" :disable="true" @click="handleButtonClick($event)"/>
+          </div>
         </div>
 
         <div v-if="errorChecking" class="actionDiv q-gutter-sm">
-            <ErrorTable :dark="darkMode" :errors="errors"></ErrorTable>
+            <ErrorTable :dark="$q.dark.isActive" :errors="errors"></ErrorTable>
             <div class="flex flex-center" style="gap: 10px">
                 <ActionButton color="primary" label="Export With Errors" @click="handleButtonClick($event)"/>
                 <ActionButton color="secondary" label="Cancel" @click="handleButtonClick($event)"/>
@@ -46,8 +39,8 @@
 </style>
 
 <script>
-import { defineComponent, ref, watch } from 'vue';
-import { useQuasar } from 'quasar'
+import { defineComponent, ref, watch, computed } from 'vue';
+import { useQuasar, QSpinnerCube } from 'quasar'
 import { UseBettorStore } from 'stores/jojo-bettors';
 
 import FileInput from '../components/FileInput.vue';
@@ -75,63 +68,75 @@ export default defineComponent({
       })
 
       return {
-          file: ref(null),
-          players: ref(null),
-          bettorsTable: ref(null),
+          file: ref({}),
+          players: ref([]),
+          bettorsTable: ref({}),
           busy: ref(false),
-          darkMode: ref(false),
-          isMica: ref(false),
-          showError: ref(false),
-          errorChecking: ref(false),
+          errorChecking: false,
           errors: ref(null),
 
           handleError() {
-              this.showError = true;
-              this.busy = false;
-              this.file = null;
+              computed(() => this.showError.value = true);
+              computed(() => this.busy.value = false);
+              computed(() => this.file.value = null);
+              $q.loading.hide();
+
           },
           handleWarning() {
-              let message = this.players.warning;
+              let message = this.players.value.warning;
               console.log(`Warning: ${message}`);
-              this.busy = false;
+              this.busy.value = false;
+              $q.loading.hide();
           },
           clearVariables() {
-            this.file = null
-            this.model = null
-            this.busy = false
-            this.players = null
-            this.bettorsTable = null
-            this.showError = false
-            this.errorChecking = false
-            this.errors = null
+            computed(() => this.file.value = null);
+            computed(() => this.players.value = []);
+            computed(() => this.busy.value = false);
+            computed(() => this.bettorsTable.value = null);
+            computed(() => this.showError.value = false);
+            computed(() => this.errorChecking.value = false);
+            computed(() => this.errors.value = null);
+            $q.loading.hide();
             if(notif) {
               notif()
             }
           },
           dismiss() {
-            this.busy = false
-            this.showError = false
+            this.busy.value = false
+            $q.loading.hide();
+            this.showError.value = false
           },
           async parseXlsx(f) {
-              this.file = f;
-              this.busy=true;
+              this.file.value = f;
+              this.busy = true
+              $q.loading.show({
+                spinner: QSpinnerCube,
+                spinnerColor: 'primary',
+                message: "Parsing the excel File.",});
               if(!f) return this.clearVariables();
-              this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [f.path, 'loadBettors']});
+              if(f[0]) {
+                console.log("Bitch")
+                computed(() => this.file.value = f[0]);
+              }
+              console.log(this.file.value);
+              this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']});
               if (!this.players) return this.handleError();
               console.log("PLAYERS:",this.players);
 
-              this.bettorsTable = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [f.path, 'loadSummary']});
-              if(store.getBettors() == [] && this.bettorsTable) {
-                  store.setBettors(this.bettorsTable);
+              this.bettorsTable.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadSummary']});
+              if(store.getBettors() == [] && this.bettorsTable.value) {
+                  store.setBettors(this.bettorsTable.value);
                   console.log(store.getBettors())
               }
 
               this.busy = false;
+              console.log(this.errorChecking)
+              $q.loading.hide();
           },
           async handleButtonClick(e) {
-              //this.busy = true;
+              //this.busy.value = true;
               if(e == 'Data Compile') {
-                this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'checkErrors', params: [this.file.path, JSON.stringify(this.players)]});
+                this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'checkErrors', params: [this.file.value.path, JSON.stringify(this.players)]});
                 if (!this.errors) {
                     this.errors = []
                     $q.notify({
@@ -147,7 +152,8 @@ export default defineComponent({
                 }
                 else if (this.errors.length > 0) {
                   this.errorChecking = true;
-                  console.log("errors: ", this.errors)
+                  this.errors.value = true;
+                  console.log("errors: ", this.errors.value)
                 }
                 else
                   notif = await this.exportFile()
@@ -156,8 +162,8 @@ export default defineComponent({
                 notif = await this.exportFile()
               }
               else if (e == 'Cancel') {
-                this.errorChecking = false
-                this.errors = null
+                this.errorCheckingerrors.value = false
+                this.errors.value = null
               }
               else if(e == 'Check For Errors') {
                 let bettors = store.getBettors();
@@ -175,7 +181,8 @@ export default defineComponent({
                 else {
                   $q.notify({ message: 'No errors found!', type: 'positive', timeout: 2000 })
                 }
-                this.busy = false;
+                this.busy.value = false;
+                $q.loading.hide();
               }
           },
           async exportFile() {
@@ -192,30 +199,20 @@ export default defineComponent({
           },
           async handleExport(e) {
               if(e == 'Edit Current File') {
-                    await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['edit', this.file.path, JSON.stringify(this.players), JSON.stringify(this.errors)]});
-                    this.busy = false;
+                    await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['edit', this.file.value.path, JSON.stringify(this.players.value), JSON.stringify(this.errors.value)]});
+                    this.busy.value = false;
+                    $q.loading.hide();
               }
               else if(e == 'New File') {
-                  await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['new', this.file.path, JSON.stringify(this.players), JSON.stringify(this.errors)]});
-                  this.busy = false;
+                  await window.ipcRenderer.invoke('xlsx', {handler: 'compileData', params: ['new', this.file.value.path, JSON.stringify(this.players.value), JSON.stringify(this.errors.value)]});
+                  this.busy.value = false;
+                  $q.loading.hide();
               }
           },
           async routeTo(path) {
               await this.$router.push(path);
           }
       }
-  },
-  async mounted() {
-      await window.ipcRenderer.getThemeMode().then((res) => this.darkMode = res.mode);
-      window.ipcRenderer.receive('theme-changed', async (arg) => this.darkMode = arg);
-      window.ipcRenderer.invoke('isMica').then( async (arg) => this.isMica = arg);
-      window.ipcRenderer.receive('notify', async (arg) => {
-          if(arg?.noClose == true) {
-              console.log('No close');
-              return notif = this.$q.notify(arg);
-          }
-          this.$q.notify(arg);
-      });
   },
 });
 </script>

@@ -16,6 +16,7 @@ import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
   name: 'MainLayout',
+
   data() {
     return {
       toggleTransition: ref(true),
@@ -24,40 +25,10 @@ export default defineComponent({
         this.toggleTransition = !t;
       },
     };
-
   },
 });
 </script>
 <style>
-@keyframes slide-left {
-  0% {
-    transform: translateX(50%);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-@keyframes slide-right{
-  0% {
-    transform: translateX(-50%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-.slide-in-enter-active {
-  animation: slide-left 0.5s ease-in-out;
-}
-.slide-in-leave-active {
-  animation: slide-right 0.5s ease-in-out reverse;
-}
-.slide-out-enter-active {
-  animation: slide-left 0.5s ease-in-out;
-}
-.slide-out-leave-active {
-  animation: slide-left 0.5s ease-in-out reverse;
-}
+
 
 </style>

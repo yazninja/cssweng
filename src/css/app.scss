@@ -1,31 +1,137 @@
 // app global css in SCSS form
 
+//yes
+.body--light {
+    --header-color: #f1ebe5;
+    --header-border: #423f32;
+    --toggle-color: #cdcfc0;
+    --toggle-active-color: #423f32;
+    --toggle-text-color: #423f32;
+    --body-color: #f1ebe5;
+    --body-text-color: #423f32;
+    .text-toggle-inactive {
+        color: #cdcfc0 !important;
+    }
+    .bg-toggle-inactive {
+        background: #cdcfc0 !important;
+    }
+    .text-toggle-active {
+        color: #423f32 !important;
+    }
+    .bg-toggle-active {
+        background: #423f32 !important;
+    }
+}
+.body--dark {
+    --header-color: #777777;
+    --header-border: #f7f9fb;
+    --toggle-color: #f7f9fb;
+    --body-color: #616569;
+    --body-text-color: #f7f9fb;
+    .text-toggle-inactive {
+        color: #f7f9fb!important;
+    }
+    .bg-toggle-inactive {
+        background: #f7f9fb !important;
+    }
+    .text-toggle-active {
+        color: #18342a !important;
+    }
+    .bg-toggle-active {
+        background: #18342a !important;
+    }
+}
+
 ::-webkit-scrollbar {
-  width: 16px;
-  height: 24px;
+    width: 16px;
+    height: 24px;
 }
 
 ::-webkit-scrollbar-button {
-  display: none;
+    display: none;
 }
 
 ::-webkit-scrollbar-track-piece {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: transparent;
-  border: 6px solid transparent;
-  box-shadow: inset 0px 0px 10px 10px rgb(200 200 200 / 50%);
-  border-radius: 16px;
-  min-height: 64px;
-  transition: border 1s;
+    background: transparent;
+    border: 6px solid transparent;
+    box-shadow: inset 0px 0px 10px 10px rgb(200 200 200 / 50%);
+    border-radius: 16px;
+    min-height: 64px;
+    transition: border 1s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  border: 5px solid transparent;
-  box-shadow: inset 0px 0px 10px 10px rgb(200 200 200 / 80%);
+    border: 5px solid transparent;
+    box-shadow: inset 0px 0px 10px 10px rgb(200 200 200 / 80%);
 }
-.q-page.dark {
-  background-color: #1d1d1d;
+// q.page-container.dark {
+//   background-color: #1d1d1d;
+// }
+body.mica {
+    background: none !important;
+}
+
+@keyframes shrink {
+    0% {
+        height: 90vh;
+    }
+    100% {
+        height: 106px;
+    }
+}
+
+@keyframes grow {
+    0% {
+        height: 106px;
+    }
+    100% {
+        height: 90vh;
+    }
+}
+
+//animation for pages
+
+@keyframes slide-left {
+    0% {
+        transform: translateX(50%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+@keyframes slide-right {
+    0% {
+        transform: translateX(-50%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+.slide-in-enter-active {
+    animation: slide-left 0.5s ease-in-out;
+}
+.slide-in-leave-active {
+    animation: slide-right 0.5s ease-in-out reverse;
+}
+.slide-out-enter-active {
+    animation: slide-left 0.5s ease-in-out;
+}
+.slide-out-leave-active {
+    animation: slide-left 0.5s ease-in-out reverse;
+}
+
+.settings-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    cursor: pointer;
+}
+.actionDiv {
+    width: 500px;
 }

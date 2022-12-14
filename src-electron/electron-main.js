@@ -32,7 +32,7 @@ function createWindow() {
       width: 1000,
       height: 600,
       minWidth: 450,
-      minHeight: 600,
+      minHeight: 635,
       useContentSize: true,
       effect: PARAMS.BACKGROUND.MICA,
       theme: VALUE.THEME.AUTO,
@@ -53,6 +53,8 @@ function createWindow() {
       icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
       width: 1000,
       height: 600,
+      minWidth: 450,
+      minHeight: 635,
       useContentSize: true,
       autoHideMenuBar: true,
       webPreferences: {

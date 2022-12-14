@@ -1,7 +1,8 @@
 <template>
-    <q-btn push rounded
+    <q-btn push filled
       :color="color"
       :label="label"
+      :disable="disable"
       @click="onClick(label)"
     />
 </template>
@@ -19,6 +20,10 @@ export default defineComponent({
     label: {
       type: String,
       default: 'Button'
+    },
+    disable: {
+      type: Boolean,
+      default: false
     }
   },
   setup() {

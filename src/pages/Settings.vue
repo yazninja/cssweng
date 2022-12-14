@@ -7,16 +7,6 @@
     <div class="flex column q-pa-md">
       <div class="text-h6 alias-title" :class="darkMode && 'text-white'">
         <div class="flex">Theme</div>
-          <q-btn-toggle
-            v-model="themeSource"
-            @update:model-value="setThemeMode(themeSource)"
-            toggle-color="primary"
-            :options="[
-              { label: 'Light', value: 'light' },
-              { label: 'Dark', value: 'dark' },
-              { label: 'System', value: 'system' }
-            ]"
-          />
           <q-option-group style="font-size: 1rem; font-weight:normal"
             v-model="themeSource"
             type="radio"
