@@ -22,7 +22,7 @@
       </div>
     </div>
     <div class="file-body">
-      <div class="file-conatiner" v-if="fileMode == 'details'">
+      <div class="file-container" v-if="fileMode == 'details'">
         <q-file
         class="file-input"
         v-model="file"
@@ -217,7 +217,7 @@ export default defineComponent({
     error: {
       type: Boolean,
       default: false,
-    },
+    }
   },
   setup() {
     const $q = useQuasar();

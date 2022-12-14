@@ -3,7 +3,6 @@
   class="text-center q-table"
   :pagination="{ rowsPerPage: 5 }"
   :dark="dark"
-  :title="Errors"
   :rows-per-page-options="[]"
   :rows="errors"
   separator="vertical"
@@ -87,7 +86,6 @@ export default defineComponent({
       style: 'currency',
       currency: 'PHP',
       })
-
     }
   },
 
