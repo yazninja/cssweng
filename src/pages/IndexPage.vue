@@ -11,6 +11,7 @@
         :busy="busy"
         :error="showError"
         @changeFile="parseXlsx($event)"
+        @changeFile2="parseXlsx($event)"
         @clearFile="clearVariables()"
         >
         </FileInput>
@@ -20,17 +21,18 @@
             <span class="flex flex-center text-warning text-center q-pl-lg q-pr-lg"> Note: Using Quick Edit automatically results in data mismatch. Use at own risk!</span>
             <div v-if="true" class="flex flex-center" style="gap: 10px">
               <ActionButton color="primary" label="Data Compile" @click="handleButtonClick($event)"/>
-              <ActionButton color="secondary" label="Check For Errors" :disable="true" @click="handleButtonClick($event)"/>
+              <ActionButton color="secondary" label="Check For Errors" :disable="false" @click="handleButtonClick($event)"/>
           </div>
         </div>
 
-        <div v-if="errors.length > 0 || errorChecking" class="actionDiv q-gutter-sm">
+        <div v-if="errors.length > 0" class="actionDiv q-gutter-sm">
             <ErrorTable :dark="$q.dark.isActive" :errors="errors.value"></ErrorTable>
             <div class="flex flex-center" style="gap: 10px">
                 <ActionButton color="primary" label="Export With Errors" @click="handleButtonClick($event)"/>
                 <ActionButton color="secondary" label="Cancel" @click="handleButtonClick($event)"/>
             </div>
         </div>
+
     </q-page>
 </template>
 
@@ -72,7 +74,7 @@ export default defineComponent({
 
   setup() {
       const $q = useQuasar()
-      console.log(store.getBettors())
+      console.log("BETTORS ON STARTUP", store.getBettors())
 
       watch(() => $q.dark.isActive, val => {
           console.log(val ? 'On dark mode' : 'On light mode')
@@ -80,16 +82,19 @@ export default defineComponent({
 
       return {
           file: ref({}),
+          file2: ref({}),
           players: ref([]),
           bettorsTable: ref({}),
           busy: ref(false),
           showError: ref(false),
           errorChecking: false,
           errors: ref([]),
+          errors_s2: ref([]),
           handleError() {
               computed(() => this.showError.value = true);
               computed(() => this.busy.value = false);
               computed(() => this.file.value = null);
+              computed(() => this.file.value2 = null);
               $q.loading.hide();
           },
           handleWarning() {
@@ -101,6 +106,7 @@ export default defineComponent({
           clearVariables() {
             $q.loading.hide();
             computed(() => this.file.value = null);
+            computed(() => this.file.value2 = null);
             computed(() => this.players.value = []);
             computed(() => this.busy.value = false);
             computed(() => this.bettorsTable.value = null);
@@ -117,43 +123,52 @@ export default defineComponent({
             computed(() => this.showError.value = false);
           },
           async parseXlsx(f) {
-            this.file.value = f;
+            if (!this.file.value) {
+              this.file.value = f;
+              console.log("FILE 1:", this.file)
+            }
+            else {
+              this.file2.value = f
+              console.log("FILE 2:", this.file2)
+            }
             computed(() => this.busy.value = true)
-            console.log("FILE:", this.file)
 
             $q.loading.show({
               spinner: QSpinnerCube,
               spinnerColor: 'primary',
               message: "Parsing the excel File.",
             });
+
             if (!f) return this.clearVariables();
 
             if (f[0]) {
-              console.log("Bitch")
+              console.log("Test")
               computed(() => this.file.value = f[0]);
             }
 
-            computed(() => this.players.value = [])
-            this.players.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']});
-            if (!this.players.value || this.players.value.length == 0) {
-              this.players.value = []
-              this.players.length = 0
-              return this.handleError();
+            if (!this.players.value) {
+              computed(() => this.players.value = [])
+              this.players.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']});
+              if (!this.players.value || this.players.value.length == 0) {
+                this.players.value = []
+                this.players.length = 0
+                return this.handleError();
+              }
+              else this.players.length = this.players.value.length
+              console.log("PLAYERS:", this.players);
             }
-            else this.players.length = this.players.value.length
-            console.log("PLAYERS:", this.players);
 
-            //computed(() => this.bettorsTable.value = null)
-            this.bettorsTable.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadSummary']});
-            if (store.getBettors() == [] && this.bettorsTable.value) {
-                store.setBettors(this.bettorsTable.value);
-                console.log(store.getBettors())
+
+            if (!this.bettorsTable.value) {
+              computed(() => this.bettorsTable.value = {})
+              this.bettorsTable.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadSummary']});
+              if (this.bettorsTable.value)
+                store.setBettors(this.bettorsTable.value)
+                console.log("BETTORS:", store.getBettors())
             }
 
             computed(() => this.busy.value = false)
-            console.log("busy:", this.busy)
             $q.loading.hide();
-
           },
           async handleButtonClick(e) {
               if(e == 'Data Compile') {
@@ -194,19 +209,28 @@ export default defineComponent({
               else if(e == 'Check For Errors') {
                 let bettors = store.getBettors();
                 console.log("bettors: ", bettors);
+                console.log(this.file, this.file2)
                 computed(() => this.busy.value = true)
-                this.errors = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.path, JSON.stringify(bettors)]});
-                if (this.errors.length > 0) {
-                  /*this.errors.forEach(error => {
-                    console.log(error)
-                    $q.notify({ message: `Error for ${error.name} - ${Object.keys(error).filter(e => (e != "name" && e != "net")).toString()}`, color: 'warning', timeout: 10000 })
-                  });*/
-                  console.log(this.errors)
+
+                computed(() => this.errors_s2.value = [])
+                this.errors_s2.value = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.value.path, this.file2.value.path, JSON.stringify(bettors)]});
+                if (!this.errors_s2.value) {
+                  this.errors_s2.value = []
+                  $q.notify({
+                    message: 'No errors were detected between both xlsx files.',
+                    type: 'positive',
+                    timeout: 0,
+                    actions: [{
+                      label: 'Dismiss', color: 'white', handler: () => this.dismiss()}]
+                  })
+                }
+                else if (this.errors_s2.value.length > 0) {
+                  this.errors_s2.length = this.errors_s2.value.length
+                  this.errorChecking = true
+                  console.log("SCRIPT 2 DETECTED ERRORS:", this.errors_s2.value)
                   $q.notify({ message: 'Errors detected.', color: 'warning'})
                 }
-                else {
-                  $q.notify({ message: 'No errors found!', type: 'positive', timeout: 2000 })
-                }
+
                 computed(() => this.busy.value = false)
                 $q.loading.hide();
               }

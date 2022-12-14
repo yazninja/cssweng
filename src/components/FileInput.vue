@@ -53,7 +53,7 @@
         :counter-label="counterLabelFn"
         :error="error"
         accept=".xlsx"
-        @update:model-value="changeFile()"
+        @update:model-value="changeFile2()"
         @clear="clearFile()"
       >
         <template v-slot:prepend>
@@ -231,12 +231,16 @@ export default defineComponent({
       fileMode: ref('upload'),
       darkMode: ref(false),
       file: ref(null),
+      file2: ref(null),
       counterLabelFn({ totalSize, filesNumber }) {
         return filesNumber < 1 ? '' : totalSize;
       },
       changeFile() {
         this.$emit('changeFile', this.file);
         this.fileMode = 'details';
+      },
+      changeFile2() {
+        this.$emit('changeFile2', this.file2);
       },
       clearFile() {
         this.$emit('clearFile');

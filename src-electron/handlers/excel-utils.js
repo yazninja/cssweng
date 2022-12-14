@@ -87,15 +87,16 @@ export const compileData = async (bw, mode, path, bettors, errors) => {
     }
 };
 
-export const crossCheck = async (bw, jojoPath, aliases) => {
+export const crossCheck = async (bw, jojoPath, comparePath, aliases) => {
     console.log("CrossCheck On: ", jojoPath)
     let workbook = await convertToWorkbook(jojoPath)
     let jojoSummaryData = await loadJojoSummary(workbook.getWorksheet('Summary'))
-    let weeklySummary = await openWeeklySummary(bw);
+    let weeklySummary = await openWeeklySummary(bw, comparePath);
     await replaceWithAliases(weeklySummary.data, aliases)
     let crossCheckErrors = await compareData(jojoSummaryData, weeklySummary.data)
     await writeErrors(bw, crossCheckErrors, weeklySummary)
     shell.openExternal(weeklySummary.path);
+    console.log(jojoPath, weeklySummary.path)
     return crossCheckErrors
 }
 
@@ -303,22 +304,27 @@ async function loadJojoSummary(summarySheet) {
  *
  * @param {*} bw - the browser window object
  */
-async function openWeeklySummary(bw) {
+async function openWeeklySummary(bw, comparePath) {
     let workbook;
     let summary;
     let fPath;
-    let options = {
+    /*let options = {
         title: 'Open Weekly Summary Sheet',
         buttonLabel: 'Cross-Check Data',
         filters: [{ name: 'Microsoft Excel Worksheet', extensions: ['xlsx'] }],
-    };
+    }; */
 
-    await dialog.showOpenDialog(bw, options).then(async ({ filePaths }) => {
+    fPath = comparePath;
+    workbook = await convertToWorkbook(fPath);
+    let summarySheet = workbook.getWorksheet('Summary');
+    summary = await loadWeeklySummary(summarySheet)
+
+    /*await dialog.showOpenDialog(bw, options).then(async ({ filePaths }) => {
         fPath = filePaths[0];
         workbook = await convertToWorkbook(filePaths[0]);
         let summarySheet = workbook.getWorksheet('Summary');
         summary = await loadWeeklySummary(summarySheet);
-    });
+    });*/
     return { path: fPath, wb: workbook, data: summary };
 }
 /** loadWeeklySummary - loads the weekly summary data
