@@ -6,6 +6,7 @@
         <q-btn-toggle
           class="file-toggle"
           v-model="fileMode"
+          :readonly="!file2Ready"
           spread
           rounded
           no-caps
