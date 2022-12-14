@@ -2,7 +2,17 @@
     <q-page class="flex flex-center column" :class="!isMica || $q.dark.isActive && 'dark'">
 
         <q-btn icon="o_settings" to="/settings" class="settings-icon" flat round :dark="$q.dark.isActive ? 'white' : 'black' " size="md" style="font-weight: 300;"/>
-        <FileInput placeholder="Input Excel File" placeholder2="Cross-refrence Excel File (weekly)" :file2Ready="players.length > 0" :dark="$q.dark.isActive" :busy="busy" :error="showError" @changeFile="parseXlsx($event)" @clearFile="clearVariables()"></FileInput>
+
+        <FileInput
+        placeholder="Input Excel File"
+        placeholder2="Cross-refrence Excel File (weekly)"
+        :file2Ready="players.length > 0"
+        :dark="$q.dark.isActive"
+        :busy="busy" :error="showError"
+        @changeFile="parseXlsx($event)"
+        @clearFile="clearVariables()"
+        >
+        </FileInput>
 
         <div v-if="(players.length > 0 && !busy && !errorChecking)" class="actionDiv q-gutter-sm q-pa-md">
             <QuickEdit :dark="$q.dark.isActive" :players="players"></QuickEdit>
@@ -72,12 +82,13 @@ export default defineComponent({
           players: ref([]),
           bettorsTable: ref({}),
           busy: ref(false),
+          showError: ref(false),
           errorChecking: false,
           errors: ref(null),
-
           handleError() {
               computed(() => this.showError.value = true);
               computed(() => this.busy.value = false);
+              computed(() => this.file.value = null);
               computed(() => this.file.value = null);
               $q.loading.hide();
 
@@ -85,10 +96,11 @@ export default defineComponent({
           handleWarning() {
               let message = this.players.value.warning;
               console.log(`Warning: ${message}`);
-              this.busy.value = false;
+              computed(() => this.busy.value = false)
               $q.loading.hide();
           },
           clearVariables() {
+            $q.loading.hide();
             computed(() => this.file.value = null);
             computed(() => this.players.value = []);
             computed(() => this.busy.value = false);
@@ -96,42 +108,47 @@ export default defineComponent({
             computed(() => this.showError.value = false);
             computed(() => this.errorChecking.value = false);
             computed(() => this.errors.value = null);
-            $q.loading.hide();
             if(notif) {
               notif()
             }
           },
           dismiss() {
-            this.busy.value = false
+            computed(() => this.busy.value = false)
             $q.loading.hide();
-            this.showError.value = false
+            computed(() => this.showError.value = false);
           },
           async parseXlsx(f) {
-              this.file.value = f;
-              this.busy = true
-              $q.loading.show({
-                spinner: QSpinnerCube,
-                spinnerColor: 'primary',
-                message: "Parsing the excel File.",});
-              if(!f) return this.clearVariables();
-              if(f[0]) {
-                console.log("Bitch")
-                computed(() => this.file.value = f[0]);
-              }
-              console.log(this.file.value);
-              this.players = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']});
-              if (!this.players) return this.handleError();
-              console.log("PLAYERS:",this.players);
+            this.file.value = f;
+            this.busy = true
+            $q.loading.show({
+              spinner: QSpinnerCube,
+              spinnerColor: 'primary',
+              message: "Parsing the excel File.",
+            });
+            if (!f) return this.clearVariables();
 
-              this.bettorsTable.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadSummary']});
-              if(store.getBettors() == [] && this.bettorsTable.value) {
-                  store.setBettors(this.bettorsTable.value);
-                  console.log(store.getBettors())
-              }
+            if (f[0]) {
+              console.log("Bitch")
+              computed(() => this.file.value = f[0]);
+            }
 
-              this.busy = false;
-              console.log(this.errorChecking)
-              $q.loading.hide();
+            console.log(this.file.value);
+            computed(() => this.players.value = [])
+            this.players.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']});
+            if (!this.players.value) return this.handleError();
+            console.log("PLAYERS:",this.players.value);
+
+            computed(() => this.bettorsTable.value = null)
+            this.bettorsTable.value = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadSummary']});
+            if (store.getBettors() == [] && this.bettorsTable.value) {
+                store.setBettors(this.bettorsTable.value);
+                console.log(store.getBettors())
+            }
+
+            this.busy = false;
+            console.log(this.errorChecking)
+            $q.loading.hide();
+
           },
           async handleButtonClick(e) {
               //this.busy.value = true;
@@ -162,8 +179,9 @@ export default defineComponent({
                 notif = await this.exportFile()
               }
               else if (e == 'Cancel') {
-                this.errorCheckingerrors.value = false
-                this.errors.value = null
+                // FIXME: this used .value before
+                this.errorChecking = false
+                this.errors = null
               }
               else if(e == 'Check For Errors') {
                 let bettors = store.getBettors();
@@ -193,7 +211,7 @@ export default defineComponent({
               actions: [
                   { label: 'Edit Current File', color: 'white', handler: () => this.handleExport('Edit Current File') },
                   { label: 'New File', color: 'white', handler: () => this.handleExport('New File') },
-                  { label: 'Cancel', color: 'white', handler: () => {$q.notify('Cancelled'); this.dismiss()} }
+                  { label: 'Cancel', color: 'white', handler: () => {this.dismiss()} }
               ]
             })
           },
