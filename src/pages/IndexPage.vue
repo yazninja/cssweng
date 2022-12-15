@@ -137,7 +137,8 @@ export default defineComponent({
             if (!this.file.value) {
               this.file.value = f;
               console.log("FILE 1:", this.file)
-              await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']})
+              let check = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']})
+              if (!check) this.clearVariables();
             }
             else if (!this.file2.value && this.file.value) {
               this.file2.value = f
@@ -216,29 +217,38 @@ export default defineComponent({
               else if(e == 'Check For Errors') {
                 let bettors = store.getBettors();
                 console.log("bettors: ", bettors);
-                console.log(this.file, this.file2)
-                computed(() => this.busy.value = true)
+                try {
+                    computed(() => this.busy.value = true)
+                    computed(() => this.errors_s2.value = [])
+                    this.errors_s2.value = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.value.path, this.file2.value.path, JSON.stringify(bettors)]});
+                    if (!this.errors_s2.value) {
+                    this.errors_s2.value = []
+                    $q.notify({
+                        message: 'No errors were detected between both xlsx files.',
+                        type: 'positive',
+                        timeout: 0,
+                        actions: [{
+                        label: 'Dismiss', color: 'white', handler: () => this.dismiss()}]
+                    })
+                    }
+                    else if (this.errors_s2.value.length > 0) {
+                    this.errors_s2.length = this.errors_s2.value.length
+                    this.errorChecking = true
+                    console.log("SCRIPT 2 DETECTED ERRORS:", this.errors_s2.value)
+                    $q.notify({ message: 'Errors detected.', color: 'warning'})
+                    }
 
-                computed(() => this.errors_s2.value = [])
-                this.errors_s2.value = await window.ipcRenderer.invoke('xlsx', {handler: 'crossCheck', params: [this.file.value.path, this.file2.value.path, JSON.stringify(bettors)]});
-                if (!this.errors_s2.value) {
-                  this.errors_s2.value = []
-                  $q.notify({
-                    message: 'No errors were detected between both xlsx files.',
-                    type: 'positive',
-                    timeout: 0,
-                    actions: [{
-                      label: 'Dismiss', color: 'white', handler: () => this.dismiss()}]
-                  })
+                    computed(() => this.busy.value = false)
                 }
-                else if (this.errors_s2.value.length > 0) {
-                  this.errors_s2.length = this.errors_s2.value.length
-                  this.errorChecking = true
-                  console.log("SCRIPT 2 DETECTED ERRORS:", this.errors_s2.value)
-                  $q.notify({ message: 'Errors detected.', color: 'warning'})
+                catch (e) {
+                    console.log(e)
+                    $q.notify({
+                        message: 'An error occured during the cross check process',
+                        type: 'negative',
+                        timeout: 0,
+                        actions: [{label: 'Dismiss', color: 'white', handler: () => this.dismiss()}]
+                    })
                 }
-
-                computed(() => this.busy.value = false)
                 $q.loading.hide();
               }
           },

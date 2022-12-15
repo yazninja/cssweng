@@ -8,8 +8,7 @@ export const loadExcelFile = async (bw, path, mode) => {
     let summarySheet = workbook.getWorksheet('Summary');
     if (mode == 'Check File 2') {
         if (!summarySheet) {
-            await errorNotif(bw, 'negative', 'Cross-reference excel file has no Summary sheet.');
-            return;
+            return await errorNotif(bw, 'negative', 'Cross-reference excel file has no Summary sheet.');
         }
     }
     else if (!playWorksheet && !summarySheet) {
