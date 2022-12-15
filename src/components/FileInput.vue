@@ -35,7 +35,6 @@
         :error="error"
         accept=".xlsx"
         @update:model-value="changeFile(1)"
-        @clear="clearFile(1)"
       >
         <template v-slot:prepend>
           <q-icon name="mdi-microsoft-excel" />
@@ -54,7 +53,6 @@
         :error="error"
         accept=".xlsx"
         @update:model-value="changeFile(2)"
-        @clear="clearFile(2)"
       >
         <template v-slot:prepend>
           <q-icon name="mdi-microsoft-excel" />
@@ -243,9 +241,6 @@ export default defineComponent({
         else if (num == 2) {
           this.$emit('changeFile', this.file2);
         }
-      },
-      clearFile(num) {
-        this.$emit('clearFile', num);
       }
     };
   },

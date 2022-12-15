@@ -11,7 +11,6 @@
         :busy="busy"
         :error="showError"
         @changeFile="parseXlsx($event)"
-        @clearFile="clearFile($event)"
         >
         </FileInput>
 
@@ -107,20 +106,6 @@ export default defineComponent({
               computed(() => this.busy.value = false)
               $q.loading.hide();
           },
-          clearFile(num) {
-            if (num == 1) {
-              this.file.value = null
-              this.errors.value = null;
-              this.errors.length = 0;
-              console.log("CLEARING FILE 1:", this.file)
-            }
-            else if (num == 2) {
-              this.file2.value = null;
-              this.errors_s2.value = null;
-              this.errors_s2.length = 0;
-              console.log("CLEARING FILE 2:", this.file2)
-            }
-          },
           clearVariables() {
             console.log("Clearing Variables");
             this.file.value = null;
@@ -147,25 +132,17 @@ export default defineComponent({
             computed(() => this.busy.value = false)
             computed(() => this.showError.value = false);
           },
-          async parseXlsx(f, num) {
-            if (!f) return
-            console.log(num)
-            if (this.file2.value && !this.file.value) {
-              console.log("Clearing All");
-              return this.clearVariables();
-            }
-
+          async parseXlsx(f) {
+            if (!f) return this.clearVariables();
             if (!this.file.value) {
               this.file.value = f;
               console.log("FILE 1:", this.file)
-              let check_error = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']})
-              if (!check_error) this.file.value = null;
+              await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file.value.path, 'loadBettors']})
             }
             else if (!this.file2.value && this.file.value) {
               this.file2.value = f
               console.log("FILE 2:", this.file2)
-              let check_error = await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file2.value.path, 'Check File 2']})
-              console.log("F2 check:", check_error)
+              await window.ipcRenderer.invoke('xlsx', {handler: 'loadXlsx', params: [this.file2.value.path, 'Check File 2']})
             }
 
 
